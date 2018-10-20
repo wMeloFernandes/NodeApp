@@ -6,6 +6,7 @@
     <string name="no_account_sign_up">Create an account\nNot a member?</string>
     <string name="lost_password">Lost Password?\nThats not a problem.</string>
     <string name="fill_empty_fields">Fill in all the fields</string>
+    <string name="try_again_alert">Try again!</string>
     <string name="ok_dialog_alert_text">Ok</string>
 
     <string name="facebook_app_ide">[APP_ID]</string>
