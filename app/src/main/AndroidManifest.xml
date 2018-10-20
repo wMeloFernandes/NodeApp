@@ -29,7 +29,11 @@
         <activity
             android:name=".login.RegisterUser"
             android:screenOrientation="portrait" />
-        <activity android:name=".login.RecoverPassword"></activity>
+        <activity android:name=".login.RecoverPassword" />
+        <activity
+            android:name=".main.MainScreen2"
+            android:label="@string/title_activity_main_screen2"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

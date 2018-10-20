@@ -50,7 +50,7 @@ public class MainScreen extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_filter_by:
-                Toast.makeText(this, "Filter by", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainScreen.this, MainScreen2.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
