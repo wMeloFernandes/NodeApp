@@ -34,12 +34,21 @@ public class LoginApplication extends AppCompatActivity {
         final EditText password = findViewById(R.id.editText_password);
         Button connectButton = findViewById(R.id.login_button);
         TextView signUp = findViewById(R.id.textView_sign);
+        TextView lostPassword = findViewById(R.id.textView_lostPassword);
+
         signUp.setText(Utils.underlineTextView(getString(R.string.no_account_sign_up)));
 
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(LoginApplication.this, RegisterUser.class));
+            }
+        });
+
+        lostPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginApplication.this, RecoverPassword.class));
             }
         });
 

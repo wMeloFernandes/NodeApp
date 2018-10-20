@@ -3,6 +3,7 @@
     package="com.example.wmell.app">
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,6 +29,7 @@
         <activity
             android:name=".login.RegisterUser"
             android:screenOrientation="portrait" />
+        <activity android:name=".login.RecoverPassword"></activity>
     </application>
 
 </manifest>
