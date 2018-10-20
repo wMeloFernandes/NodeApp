@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Digital Key</string>
+
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_account_sign_up">Create an account\nNot a member?</string>
+    <string name="lost_password">Lost Password?\nThats not a problem.</string>
+    <string name="fill_empty_fields">Fill in all the fields</string>
+    <string name="ok_dialog_alert_text">Ok</string>
+
+    <string name="facebook_app_ide">[APP_ID]</string>
+    <string name="fb_login_protocol_scheme">fb[APP_ID]</string>
+    <string name="app_id">$app_id_here</string>
+
+
+    <!--MainScreen Activity -->
+    <string name="fetching_data_server">Fetching from Server</string>
+
+
+    <string name="nfc_orientation">Posicione a parte de trás do celular próximo</string>
+    <string name="nfc_orientation_second">ao leitor NFC.</string>
+    <string name="title_activity_test">TestActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+</resources>

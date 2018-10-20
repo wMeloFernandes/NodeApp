@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimaryPurple">#782383</color>
+    <color name="colorPrimaryDarkPurple">#3c1141</color>
+    <color name="colorBackgroundNFC">#C0B6C2</color>
+    <color name="colorBackgroundWhite">#FFFFFF</color>
+
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorBackgroundMainScreen">#3A3A3A</color>
+    <color name="colorAnimationNFC">#782383</color>
+</resources>
