@@ -3,6 +3,7 @@
     package="com.example.wmell.app">
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -21,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".main.MainScreen"
+            android:name=".main.MainScreenOld"
             android:screenOrientation="portrait" />
         <activity
             android:name=".main.GateDetails"
@@ -31,7 +32,7 @@
             android:screenOrientation="portrait" />
         <activity android:name=".login.RecoverPassword" />
         <activity
-            android:name=".main.MainScreen2"
+            android:name=".main.MainScreen"
             android:label="@string/title_activity_main_screen2"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

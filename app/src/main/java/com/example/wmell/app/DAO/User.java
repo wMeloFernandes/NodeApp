@@ -1,8 +1,23 @@
 package com.example.wmell.app.DAO;
 
-/**
- * Created by wmell on 20/10/2018.
- */
 
 public class User {
+
+    private String mUsername;
+    private String mEmail;
+
+    public User(String username, String email) {
+        this.mUsername = username;
+        this.mEmail = email;
+    }
+
+
+    public String getUsername() {
+        return this.mUsername;
+    }
+
+    public String getEmail() {
+        return mEmail;
+    }
+
 }

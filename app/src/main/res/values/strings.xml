@@ -14,7 +14,7 @@
     <string name="app_id">$app_id_here</string>
 
 
-    <!--MainScreen Activity -->
+    MainScreenOldreen Activity -->
     <string name="fetching_data_server">Fetching from Server</string>
 
 

@@ -4,23 +4,32 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.CountDownTimer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
+import com.example.wmell.app.login.LoginApplication;
+import com.example.wmell.app.networking.APIRoutes;
 
 import java.util.ArrayList;
 
@@ -29,51 +38,63 @@ import static com.example.wmell.app.util.Constants.PERMISSION_DENIED;
 import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
 import static com.example.wmell.app.util.Constants.PERMISSION_REQUESTED;
 
-public class MainScreen extends AppCompatActivity {
+public class MainScreen extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
-    private LinearLayout mLinerarLayoutMain;
+    public User mUserText = new User("Willian", "w.melo.fernandes.un@gmail.com");
+    private static LinearLayout mLinerarLayoutMain;
     private ProgressBar mProgressBarMain;
     private TextView mTextViewMain;
-    private RecyclerView mRecyclerViewData;
+    private static RecyclerView mRecyclerViewData;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Gate> mGates;
     private GatesAdapter mGateAdapter;
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main_screen, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_filter_by:
-                startActivity(new Intent(MainScreen.this, MainScreen2.class));
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mLinerarLayoutMain = findViewById(R.id.linearLayout_main);
-        mProgressBarMain = findViewById(R.id.progressBar_Main);
-        mTextViewMain = findViewById(R.id.textView_main);
-        mRecyclerViewData = findViewById(R.id.recyclerView_main);
+        setContentView(R.layout.activity_main_screen2);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateUIFetchingDataHide();
+                APIRoutes.waitServerResponse();
+                Snackbar.make(view, "Gate Updated!", Snackbar.LENGTH_LONG)
+                        .setAction("Gate Updated!!!!!", null).show();
+            }
+        });
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View headerLayout = navigationView.getHeaderView(0);
+
+        TextView name = headerLayout.findViewById(R.id.nameView);
+        TextView email = headerLayout.findViewById(R.id.emailView);
+        name.setText(mUserText.getUsername());
+        email.setText(mUserText.getEmail());
+
+        mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
+        mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
+        mTextViewMain = findViewById(R.id.textView_mainScreen);
+        mRecyclerViewData = findViewById(R.id.recyclerView_mainScreen);
         mGates = new ArrayList<>();
 
-        //Wait for Server answer(MOCKED YET)
-        waitServerResponse();
+        APIRoutes.waitServerResponse();
 
         //Setting RecyclerView
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerViewData.setLayoutManager(mLayoutManager);
-        mRecyclerViewData.addOnItemTouchListener(new RecyclerTouchListener(this, mRecyclerViewData, new ClickListenerRecyclerView() {
+        mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(this, mRecyclerViewData, new ClickListenerRecyclerView() {
             @Override
             public void onClick(View view, int position) {
                 checkHasAuthorization(mGates.get(position).getAccessStatus(), view, mGates.get(position));
@@ -81,7 +102,6 @@ public class MainScreen extends AppCompatActivity {
 
             @Override
             public void onLongClick(View view, int position) {
-                Toast.makeText(MainScreen.this, "Long Click: " + position, Toast.LENGTH_SHORT).show();
             }
         }));
 
@@ -89,25 +109,58 @@ public class MainScreen extends AppCompatActivity {
 
         mGateAdapter = new GatesAdapter(getApplicationContext(), mGates);
         mRecyclerViewData.setAdapter(mGateAdapter);
+
     }
 
-
-    private void updateUIFetchingData() {
-        mLinerarLayoutMain.setVisibility(View.GONE);
-        mRecyclerViewData.setVisibility(View.VISIBLE);
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
-    private void waitServerResponse() {
-        new CountDownTimer(2000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-            }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_screen2, menu);
+        return true;
+    }
 
-            @Override
-            public void onFinish() {
-                updateUIFetchingData();
-            }
-        }.start();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_permissionsOnHold) {
+            // Filtrar permissões ON HOLD
+        } else if (id == R.id.nav_history) {
+            //Pegar historico do Servidor
+        } else if (id == R.id.nav_logout) {
+            startActivity(new Intent(MainScreen.this, LoginApplication.class));
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
@@ -153,7 +206,23 @@ public class MainScreen extends AppCompatActivity {
         }
     }
 
+    public static void updateUIFetchingData() {
+        mLinerarLayoutMain.setVisibility(View.GONE);
+        mRecyclerViewData.setVisibility(View.VISIBLE);
+    }
+
+    public static void updateUIFetchingDataHide() {
+        mLinerarLayoutMain.setVisibility(View.VISIBLE);
+        mRecyclerViewData.setVisibility(View.GONE);
+    }
+
     public void addMockedGates(ArrayList<Gate> gates) {
+        gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
+        gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
+        gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
+        gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
+        gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
+        gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
         gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
         gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
         gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
@@ -190,5 +259,4 @@ public class MainScreen extends AppCompatActivity {
         }
 
     }
-
 }
