@@ -57,17 +57,6 @@ public class MainScreen extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateUIFetchingDataHide();
-                APIRoutes.waitServerResponse();
-                Snackbar.make(view, "Gate Updated!", Snackbar.LENGTH_LONG)
-                        .setAction("Gate Updated!!!!!", null).show();
-            }
-        });
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -137,7 +126,9 @@ public class MainScreen extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_update) {
+            updateUIFetchingDataHide();
+            APIRoutes.waitServerResponse();
             return true;
         }
 
