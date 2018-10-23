@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.wmell.app.R;
-import com.example.wmell.app.main.MainScreenOld;
+import com.example.wmell.app.main.MainScreen;
 import com.example.wmell.app.util.Utils;
 
 public class RecoverPassword extends AppCompatActivity {
@@ -69,7 +69,7 @@ public class RecoverPassword extends AppCompatActivity {
                 String password = editTextPassword.getText().toString();
                 //Passa para o servidor a nova senha
 
-                startActivity(new Intent(RecoverPassword.this, MainScreenOld.class));
+                startActivity(new Intent(RecoverPassword.this, MainScreen.class));
             }
         });
 

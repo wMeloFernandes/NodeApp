@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.wmell.app.R;
-import com.example.wmell.app.main.MainScreenOld;
+import com.example.wmell.app.main.MainScreen;
 import com.example.wmell.app.util.Utils;
 
 public class RegisterUser extends AppCompatActivity {
@@ -39,7 +39,7 @@ public class RegisterUser extends AppCompatActivity {
             public void onClick(View v) {
                 if (Utils.isFilled(mUsername.getText().toString()) && Utils.isFilled(mEmail.getText().toString()) &&
                         Utils.isFilled(mPassword.getText().toString())) {
-                    startActivity(new Intent(RegisterUser.this, MainScreenOld.class));
+                    startActivity(new Intent(RegisterUser.this, MainScreen.class));
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(RegisterUser.this, R.style.Theme_AppCompat));
                     builder.setMessage(getString(R.string.fill_empty_fields));

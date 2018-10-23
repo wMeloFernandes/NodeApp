@@ -26,6 +26,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_update">Update</string>
-    <string name="title_activity_main_screen2">MainScreen2</string>
+    <string name="title_activity_main_screen2">Gates List</string>
 
 </resources>
