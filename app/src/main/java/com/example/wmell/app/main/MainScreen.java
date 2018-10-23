@@ -5,10 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -26,12 +25,20 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
 import com.example.wmell.app.networking.APIRoutes;
+import com.example.wmell.app.networking.DigitalKeyApi;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.example.wmell.app.util.Constants.GATE_DOOR;
 import static com.example.wmell.app.util.Constants.PERMISSION_DENIED;
@@ -39,7 +46,7 @@ import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
 import static com.example.wmell.app.util.Constants.PERMISSION_REQUESTED;
 
 public class MainScreen extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, onDataLoader {
 
     public User mUserText = new User("Willian", "w.melo.fernandes.un@gmail.com");
     private static LinearLayout mLinerarLayoutMain;
@@ -48,6 +55,7 @@ public class MainScreen extends AppCompatActivity
     private static RecyclerView mRecyclerViewData;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Gate> mGates;
+    public static Gates mGatesDAO;
     private GatesAdapter mGateAdapter;
 
     @Override
@@ -58,6 +66,7 @@ public class MainScreen extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        getGatesList(onDataLoader);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -87,7 +96,8 @@ public class MainScreen extends AppCompatActivity
         mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(this, mRecyclerViewData, new ClickListenerRecyclerView() {
             @Override
             public void onClick(View view, int position) {
-                checkHasAuthorization(mGates.get(position).getAccessStatus(), view, mGates.get(position));
+                //checkHasAuthorization(mGates.get(position).getAccessStatus(), view, mGates.get(position));
+                Toast.makeText(MainScreen.this, "Clicou", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -95,9 +105,9 @@ public class MainScreen extends AppCompatActivity
             }
         }));
 
-        addMockedGates(mGates);
+        //addMockedGates(mGates);
 
-        mGateAdapter = new GatesAdapter(getApplicationContext(), mGates);
+        mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
         mRecyclerViewData.setAdapter(mGateAdapter);
 
     }
@@ -155,6 +165,11 @@ public class MainScreen extends AppCompatActivity
         return true;
     }
 
+    @Override
+    public void onDataLoaded(Gates gates) {
+        mGatesDAO = gates;
+    }
+
     class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
         private ClickListenerRecyclerView clicklistener;
@@ -208,19 +223,6 @@ public class MainScreen extends AppCompatActivity
         mRecyclerViewData.setVisibility(View.GONE);
     }
 
-    public void addMockedGates(ArrayList<Gate> gates) {
-        gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 1", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_DENIED, "Office 2", GATE_DOOR));
-        gates.add(new Gate(PERMISSION_GRANTED, "Room 7", GATE_DOOR));
-    }
-
     private void checkHasAuthorization(int authorization, final View view, final Gate gate) {
         switch (authorization) {
             case PERMISSION_GRANTED:
@@ -250,5 +252,30 @@ public class MainScreen extends AppCompatActivity
                 break;
         }
 
+    }
+
+    public void getGatesList(final onDataLoader onDataLoader) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.101:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+
+        Call<Gates> call = service.getGates();
+
+        call.enqueue(new Callback<Gates>() {
+            @Override
+            public void onResponse(Call<Gates> call, Response<Gates> response) {
+                if (response.isSuccessful()) {
+                    onDataLoader.onDataLoaded(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Gates> call, Throwable t) {
+                Toast.makeText(MainScreen.this, "There was a requisition problem.Try again later!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

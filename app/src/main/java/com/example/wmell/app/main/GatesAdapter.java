@@ -9,18 +9,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.wmell.app.DAO.*;
 import com.example.wmell.app.R;
 
-import java.util.ArrayList;
 
 public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHolder> {
 
     public static final String TAG = GatesAdapter.class.getSimpleName();
     private Context mContext;
-    private ArrayList<Gate> mGates;
+    private Gates mGates;
 
 
-    public GatesAdapter(Context context, ArrayList<Gate> gates) {
+    public GatesAdapter(Context context, Gates gates) {
         mContext = context;
         mGates = gates;
     }
@@ -33,15 +33,16 @@ public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHold
 
     @Override
     public void onBindViewHolder(GateViewHolder holder, int position) {
-        Gate gate = mGates.get(position);
-        holder.viewImageIcon.setImageResource(gate.getTypeGateImage());
-        holder.viewName.setText(gate.getGateName());
-        holder.viewLock.setImageResource(gate.setIconStatus());
+        //Gate gate = mGates.getGates().get(position);
+        com.example.wmell.app.DAO.Gate gate = mGates.getGates().get(position);
+        holder.viewImageIcon.setImageResource(R.drawable.door);
+        holder.viewName.setText(gate.getName());
+        holder.viewLock.setImageResource(R.drawable.green_padlock);
     }
 
     @Override
     public int getItemCount() {
-        return mGates.size();
+        return mGates.getGates().size();
     }
 
     public static class GateViewHolder extends RecyclerView.ViewHolder {

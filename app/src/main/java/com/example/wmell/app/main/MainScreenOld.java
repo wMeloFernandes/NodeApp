@@ -87,7 +87,7 @@ public class MainScreenOld extends AppCompatActivity {
 
         addMockedGates(mGates);
 
-        mGateAdapter = new GatesAdapter(getApplicationContext(), mGates);
+        //mGateAdapter = new GatesAdapter(getApplicationContext(), mGates);
         mRecyclerViewData.setAdapter(mGateAdapter);
     }
 
