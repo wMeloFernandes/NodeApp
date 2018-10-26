@@ -31,7 +31,7 @@
             android:backgroundTint="@color/colorBackgroundWhite"
             android:foregroundTint="@color/colorBackgroundWhite"
             android:hint="Email"
-            android:inputType="textAutoComplete"
+            android:inputType="textEmailAddress"
             android:shadowColor="@color/colorBackgroundWhite"
             android:textColor="@color/colorBackgroundWhite"
             android:textColorHighlight="@color/colorBackgroundWhite"

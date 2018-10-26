@@ -28,4 +28,7 @@
     <string name="action_update">Update</string>
     <string name="title_activity_main_screen2">Gates List</string>
 
+    <string name="show_user_id">This is your KEYID. It will be used in case of lost password. Keep it carefully!</string>
+    <string name="email_already_registered">E-mail already registered</string>
+
 </resources>

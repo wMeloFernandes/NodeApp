@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -26,13 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.wmell.app.DAO.Gates;
-import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
-import com.example.wmell.app.networking.APIRoutes;
 import com.example.wmell.app.networking.DigitalKeyApi;
+import com.example.wmell.app.networking.ServerCallback;
 
-import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,21 +37,18 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.example.wmell.app.util.Constants.GATE_DOOR;
 import static com.example.wmell.app.util.Constants.PERMISSION_DENIED;
 import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
 import static com.example.wmell.app.util.Constants.PERMISSION_REQUESTED;
 
 public class MainScreen extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, onDataLoader {
+        implements NavigationView.OnNavigationItemSelectedListener, ServerCallback {
 
-    public User mUserText = new User("Willian", "w.melo.fernandes.un@gmail.com");
     private static LinearLayout mLinerarLayoutMain;
     private ProgressBar mProgressBarMain;
     private TextView mTextViewMain;
     private static RecyclerView mRecyclerViewData;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<Gate> mGates;
     public static Gates mGatesDAO;
     private GatesAdapter mGateAdapter;
 
@@ -66,7 +60,42 @@ public class MainScreen extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getGatesList(onDataLoader);
+        getGatesList(new ServerCallback() {
+            @Override
+            public void onFail(Throwable throwable) {
+                mLinerarLayoutMain.setVisibility(View.GONE);
+                mRecyclerViewData.setVisibility(View.VISIBLE);
+                mGatesDAO.getGates().clear();
+            }
+
+            @Override
+            public void onSuccess(Gates gates) {
+                mLinerarLayoutMain.setVisibility(View.GONE);
+                mRecyclerViewData.setVisibility(View.VISIBLE);
+                //Setting RecyclerView
+                mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                mRecyclerViewData.setLayoutManager(mLayoutManager);
+                mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+                    @Override
+                    public void onClick(View view, int position) {
+                        startActivity(new Intent(MainScreen.this, GateDetails.class));
+                    }
+
+                    @Override
+                    public void onLongClick(View view, int position) {
+                    }
+                }));
+
+                mGatesDAO = gates;
+                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
+                mRecyclerViewData.setAdapter(mGateAdapter);
+            }
+
+            @Override
+            public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+            }
+        });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -79,36 +108,19 @@ public class MainScreen extends AppCompatActivity
 
         TextView name = headerLayout.findViewById(R.id.nameView);
         TextView email = headerLayout.findViewById(R.id.emailView);
-        name.setText(mUserText.getUsername());
-        email.setText(mUserText.getEmail());
+        //name.setText(mUserText.getUsername());
+        //email.setText(mUserText.getEmail());
 
         mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
         mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
         mTextViewMain = findViewById(R.id.textView_mainScreen);
         mRecyclerViewData = findViewById(R.id.recyclerView_mainScreen);
-        mGates = new ArrayList<>();
 
-        APIRoutes.waitServerResponse();
+        mLinerarLayoutMain.setVisibility(View.VISIBLE);
+        mRecyclerViewData.setVisibility(View.GONE);
 
-        //Setting RecyclerView
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerViewData.setLayoutManager(mLayoutManager);
-        mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(this, mRecyclerViewData, new ClickListenerRecyclerView() {
-            @Override
-            public void onClick(View view, int position) {
-                //checkHasAuthorization(mGates.get(position).getAccessStatus(), view, mGates.get(position));
-                Toast.makeText(MainScreen.this, "Clicou", Toast.LENGTH_SHORT).show();
-            }
+        //APIRoutes.waitServerResponse();
 
-            @Override
-            public void onLongClick(View view, int position) {
-            }
-        }));
-
-        //addMockedGates(mGates);
-
-        mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
-        mRecyclerViewData.setAdapter(mGateAdapter);
 
     }
 
@@ -138,8 +150,43 @@ public class MainScreen extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_update) {
-            updateUIFetchingDataHide();
-            APIRoutes.waitServerResponse();
+            getGatesList(new ServerCallback() {
+                @Override
+                public void onFail(Throwable throwable) {
+                    mLinerarLayoutMain.setVisibility(View.GONE);
+                    mRecyclerViewData.setVisibility(View.VISIBLE);
+                    mGatesDAO.getGates().clear();
+                }
+
+                @Override
+                public void onSuccess(Gates gates) {
+                    mLinerarLayoutMain.setVisibility(View.GONE);
+                    mRecyclerViewData.setVisibility(View.VISIBLE);
+                    //Setting RecyclerView
+                    mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    mRecyclerViewData.setLayoutManager(mLayoutManager);
+                    mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+                        @Override
+                        public void onClick(View view, int position) {
+                            startActivity(new Intent(MainScreen.this, GateDetails.class));
+                        }
+
+                        @Override
+                        public void onLongClick(View view, int position) {
+                        }
+                    }));
+
+                    mGatesDAO = gates;
+                    mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
+                    mRecyclerViewData.setAdapter(mGateAdapter);
+                }
+
+                @Override
+                public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+                }
+
+            });
             return true;
         }
 
@@ -166,9 +213,20 @@ public class MainScreen extends AppCompatActivity
     }
 
     @Override
-    public void onDataLoaded(Gates gates) {
-        mGatesDAO = gates;
+    public void onFail(Throwable throwable) {
+
     }
+
+    @Override
+    public void onSuccess(Gates gates) {
+
+    }
+
+    @Override
+    public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+    }
+
 
     class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
@@ -254,7 +312,7 @@ public class MainScreen extends AppCompatActivity
 
     }
 
-    public void getGatesList(final onDataLoader onDataLoader) {
+    public void getGatesList(final ServerCallback serverCallback) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://192.168.1.101:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -268,13 +326,16 @@ public class MainScreen extends AppCompatActivity
             @Override
             public void onResponse(Call<Gates> call, Response<Gates> response) {
                 if (response.isSuccessful()) {
-                    onDataLoader.onDataLoaded(response.body());
+                    Gates gates = response.body();
+                    //mGatesDAO = response.body();
+                    serverCallback.onSuccess(gates);
                 }
             }
 
             @Override
             public void onFailure(Call<Gates> call, Throwable t) {
                 Toast.makeText(MainScreen.this, "There was a requisition problem.Try again later!", Toast.LENGTH_SHORT).show();
+                serverCallback.onFail(t);
             }
         });
     }

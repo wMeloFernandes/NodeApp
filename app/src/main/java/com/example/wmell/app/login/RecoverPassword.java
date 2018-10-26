@@ -9,12 +9,28 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.wmell.app.DAO.Gates;
+import com.example.wmell.app.DAO.Response;
 import com.example.wmell.app.R;
 import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.networking.DigitalKeyApi;
+import com.example.wmell.app.networking.ServerCallback;
 import com.example.wmell.app.util.Utils;
 
-public class RecoverPassword extends AppCompatActivity {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class RecoverPassword extends AppCompatActivity implements ServerCallback {
+
+
+    private String mUserID;
+    private String mEmail;
+    private String mPassword;
+    private boolean mResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,18 +48,35 @@ public class RecoverPassword extends AppCompatActivity {
         buttonRecover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = editTextEmail.getText().toString();
-                String KeyID = editTextKeyID.getText().toString();
+                mEmail = editTextEmail.getText().toString();
+                mUserID = editTextKeyID.getText().toString();
 
                 //Verifica nos Servidor as informações e ativa o botão de nova senha
-                boolean result;
-                if (Utils.isFilled(email)) {
-                    result = true;
+                if (Utils.isFilled(mEmail) && Utils.isFilled(mUserID)) {
+                    checkEmailAndKeyID(new ServerCallback() {
+                        @Override
+                        public void onSuccess(Gates gates) {
+                        }
+
+                        @Override
+                        public void onSuccess(Response response) {
+                            if (Integer.valueOf(response.getStatus()) == 200) {
+                                mResult = true;
+                            } else {
+                                Toast.makeText(RecoverPassword.this, "There is a problem with your account. Contact the administrator!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFail(Throwable throwable) {
+
+                        }
+                    });
                 } else {
-                    result = false;
+                    mResult = false;
                 }
 
-                if (result) {
+                if (mResult) {
                     editTextEmail.setFocusable(false);
                     editTextKeyID.setFocusable(false);
                     editTextPassword.setVisibility(View.VISIBLE);
@@ -66,13 +99,96 @@ public class RecoverPassword extends AppCompatActivity {
         buttonNewPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String password = editTextPassword.getText().toString();
-                //Passa para o servidor a nova senha
+                mPassword = editTextPassword.getText().toString();
+                updateUserPassword(new ServerCallback() {
+                    @Override
+                    public void onSuccess(Gates gates) {
+                    }
 
-                startActivity(new Intent(RecoverPassword.this, MainScreen.class));
+                    @Override
+                    public void onSuccess(Response response) {
+                        if (Integer.valueOf(response.getStatus()) == 200) {
+                            startActivity(new Intent(RecoverPassword.this, MainScreen.class));
+                            Toast.makeText(RecoverPassword.this, "Password changed successful", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(RecoverPassword.this, "Connection Error. Try again later!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFail(Throwable throwable) {
+                        Toast.makeText(RecoverPassword.this, "Connection Error. Try again later!", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
 
+    }
+
+    @Override
+    public void onSuccess(Gates gates) {
+    }
+
+    @Override
+    public void onSuccess(Response response) {
+    }
+
+    @Override
+    public void onFail(Throwable throwable) {
+    }
+
+
+    private void checkEmailAndKeyID(final ServerCallback serverCallback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.101:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+
+        Call<Response> call = service.checkIfKeyIDIsValid(mUserID, mEmail);
+
+        call.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<com.example.wmell.app.DAO.Response> call, retrofit2.Response<Response> response) {
+                if (response.isSuccessful()) {
+                    com.example.wmell.app.DAO.Response response1 = response.body();
+                    serverCallback.onSuccess(response1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.example.wmell.app.DAO.Response> call, Throwable t) {
+                serverCallback.onFail(t);
+            }
+        });
+    }
+
+
+    private void updateUserPassword(final ServerCallback serverCallback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.101:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+
+        Call<Response> call = service.updatePassword(mUserID, mPassword);
+
+        call.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<com.example.wmell.app.DAO.Response> call, retrofit2.Response<Response> response) {
+                if (response.isSuccessful()) {
+                    com.example.wmell.app.DAO.Response response1 = response.body();
+                    serverCallback.onSuccess(response1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.example.wmell.app.DAO.Response> call, Throwable t) {
+                serverCallback.onFail(t);
+            }
+        });
     }
 }
