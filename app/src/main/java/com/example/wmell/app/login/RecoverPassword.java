@@ -30,7 +30,12 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
     private String mUserID;
     private String mEmail;
     private String mPassword;
-    private boolean mResult;
+    private EditText editTextEmail;
+    private EditText editTextKeyID;
+    private EditText editTextPassword;
+    private Button buttonRecover;
+    private Button buttonNewPassword;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +43,11 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
         setContentView(R.layout.activity_recover_password);
 
 
-        final EditText editTextEmail = findViewById(R.id.editTextRecoverEmail);
-        final EditText editTextKeyID = findViewById(R.id.editTextRecoverKeyID);
-        final EditText editTextPassword = findViewById(R.id.editTextRecoverPassword);
-        final Button buttonRecover = findViewById(R.id.recover_button);
-        final Button buttonNewPassword = findViewById(R.id.save_new_password_button);
+        editTextEmail = findViewById(R.id.editTextRecoverEmail);
+        editTextKeyID = findViewById(R.id.editTextRecoverKeyID);
+        editTextPassword = findViewById(R.id.editTextRecoverPassword);
+        buttonRecover = findViewById(R.id.recover_button);
+        buttonNewPassword = findViewById(R.id.save_new_password_button);
 
 
         buttonRecover.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +66,7 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                         @Override
                         public void onSuccess(Response response) {
                             if (Integer.valueOf(response.getStatus()) == 200) {
-                                mResult = true;
+                                enableUpdatePasswordLayout();
                             } else {
                                 Toast.makeText(RecoverPassword.this, "There is a problem with your account. Contact the administrator!", Toast.LENGTH_SHORT).show();
                             }
@@ -69,22 +74,12 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
 
                         @Override
                         public void onFail(Throwable throwable) {
-
+                            Toast.makeText(RecoverPassword.this, "There is a problem with your account. Contact the administrator!", Toast.LENGTH_SHORT).show();
                         }
                     });
                 } else {
-                    mResult = false;
-                }
-
-                if (mResult) {
-                    editTextEmail.setFocusable(false);
-                    editTextKeyID.setFocusable(false);
-                    editTextPassword.setVisibility(View.VISIBLE);
-                    buttonNewPassword.setVisibility(View.VISIBLE);
-                    buttonRecover.setVisibility(View.GONE);
-                } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(RecoverPassword.this, R.style.Theme_AppCompat));
-                    builder.setMessage(getString(R.string.try_again_alert));
+                    builder.setMessage(getString(R.string.fill_empty_fields));
                     builder.setPositiveButton(getString(R.string.ok_dialog_alert_text), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -93,6 +88,8 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                     });
                     builder.show();
                 }
+
+
             }
         });
 
@@ -190,5 +187,14 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                 serverCallback.onFail(t);
             }
         });
+    }
+
+    public void enableUpdatePasswordLayout() {
+        Toast.makeText(this, "Enter the new password!", Toast.LENGTH_SHORT).show();
+        editTextEmail.setFocusable(false);
+        editTextKeyID.setFocusable(false);
+        editTextPassword.setVisibility(View.VISIBLE);
+        buttonNewPassword.setVisibility(View.VISIBLE);
+        buttonRecover.setVisibility(View.GONE);
     }
 }

@@ -179,6 +179,7 @@ public class MainScreen extends AppCompatActivity
                     mGatesDAO = gates;
                     mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
                     mRecyclerViewData.setAdapter(mGateAdapter);
+                    Toast.makeText(MainScreen.this, "Gates list updated!", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
