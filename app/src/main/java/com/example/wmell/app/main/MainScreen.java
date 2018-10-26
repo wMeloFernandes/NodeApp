@@ -60,6 +60,7 @@ public class MainScreen extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //getUserInformations
         getGatesList(new ServerCallback() {
             @Override
             public void onFail(Throwable throwable) {
