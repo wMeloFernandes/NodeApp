@@ -1,7 +1,9 @@
 package com.example.wmell.app.login;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,19 +14,28 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.wmell.app.DAO.Gates;
+import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Response;
+import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
+import com.example.wmell.app.DAO.ResponseRegister;
 import com.example.wmell.app.R;
 import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallback;
+import com.example.wmell.app.networking.ServerCallbackRegisterRecover;
 import com.example.wmell.app.util.Utils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RecoverPassword extends AppCompatActivity implements ServerCallback {
+import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
+
+public class RecoverPassword extends AppCompatActivity implements ServerCallbackRegisterRecover {
 
 
     private String mUserID;
@@ -73,9 +84,14 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                         }
 
                         @Override
+                        public void onSuccess(HistoricalUserList historicalUserList) {
+                        }
+
+                        @Override
                         public void onFail(Throwable throwable) {
                             Toast.makeText(RecoverPassword.this, "There is a problem with your account. Contact the administrator!", Toast.LENGTH_SHORT).show();
                         }
+
                     });
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(RecoverPassword.this, R.style.Theme_AppCompat));
@@ -97,14 +113,18 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
             @Override
             public void onClick(View v) {
                 mPassword = editTextPassword.getText().toString();
-                updateUserPassword(new ServerCallback() {
+                updateUserPassword(new ServerCallbackRegisterRecover() {
                     @Override
-                    public void onSuccess(Gates gates) {
-                    }
-
-                    @Override
-                    public void onSuccess(Response response) {
+                    public void onSuccess(ResponseRegister response) {
                         if (Integer.valueOf(response.getStatus()) == 200) {
+                            SharedPreferences sharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(USERNAME_PREFERENCE, response.getUsername());
+                            editor.putString(EMAIL_PREFERENCE, response.getEmail());
+                            editor.putInt(USERID_PREFERENCE, response.getUserId());
+                            editor.putString(LASTACCESS_PREFERENCE, response.getLastAccess());
+                            editor.apply();
+
                             startActivity(new Intent(RecoverPassword.this, MainScreen.class));
                             Toast.makeText(RecoverPassword.this, "Password changed successful", Toast.LENGTH_LONG).show();
                         } else {
@@ -124,11 +144,7 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
     }
 
     @Override
-    public void onSuccess(Gates gates) {
-    }
-
-    @Override
-    public void onSuccess(Response response) {
+    public void onSuccess(ResponseRegister responseRegister) {
     }
 
     @Override
@@ -137,12 +153,7 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
 
 
     private void checkEmailAndKeyID(final ServerCallback serverCallback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+        DigitalKeyApi service = ApiManager.getService();
 
         Call<Response> call = service.checkIfKeyIDIsValid(mUserID, mEmail);
 
@@ -163,27 +174,22 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
     }
 
 
-    private void updateUserPassword(final ServerCallback serverCallback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    private void updateUserPassword(final ServerCallbackRegisterRecover serverCallback) {
+        DigitalKeyApi service = ApiManager.getService();
 
-        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+        Call<ResponseRegister> call = service.updatePassword(mUserID, mPassword);
 
-        Call<Response> call = service.updatePassword(mUserID, mPassword);
-
-        call.enqueue(new Callback<Response>() {
+        call.enqueue(new Callback<ResponseRegister>() {
             @Override
-            public void onResponse(Call<com.example.wmell.app.DAO.Response> call, retrofit2.Response<Response> response) {
+            public void onResponse(Call<com.example.wmell.app.DAO.ResponseRegister> call, retrofit2.Response<ResponseRegister> response) {
                 if (response.isSuccessful()) {
-                    com.example.wmell.app.DAO.Response response1 = response.body();
+                    com.example.wmell.app.DAO.ResponseRegister response1 = response.body();
                     serverCallback.onSuccess(response1);
                 }
             }
 
             @Override
-            public void onFailure(Call<com.example.wmell.app.DAO.Response> call, Throwable t) {
+            public void onFailure(Call<com.example.wmell.app.DAO.ResponseRegister> call, Throwable t) {
                 serverCallback.onFail(t);
             }
         });

@@ -7,8 +7,13 @@ import android.support.v4.app.NotificationCompat;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 
 import com.example.wmell.app.R;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Utils {
 
@@ -52,4 +57,20 @@ public class Utils {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, builder.build());
     }
+
+    public static List<Integer> parsePermissions(String permissions) {
+        List<String> result = new ArrayList<>();
+        if (permissions.isEmpty()) {
+            return null;
+        } else {
+            String[] testando = permissions.split(",");
+            result = Arrays.asList(testando);
+            ArrayList<Integer> list = new ArrayList<>();
+            for (int i = 0; i < testando.length; i++) {
+                list.add(Integer.valueOf(testando[i]));
+            }
+            return list;
+        }
+    }
 }
+

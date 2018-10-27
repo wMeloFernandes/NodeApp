@@ -31,4 +31,7 @@
     <string name="show_user_id">This is your KEYID. It will be used in case of lost password. Keep it carefully!</string>
     <string name="email_already_registered">E-mail already registered</string>
 
+    <string name="title_main_activity_gates">Gates List</string>
+    <string name="title_main_activity_historical">Historical List</string>
+
 </resources>

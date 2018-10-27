@@ -47,6 +47,7 @@
             android:foregroundTint="@color/colorBackgroundWhite"
             android:hint="Password"
             android:inputType="numberPassword"
+            android:maxLength="6"
             android:shadowColor="@color/colorBackgroundWhite"
             android:textColor="@color/colorBackgroundWhite"
             android:textColorHighlight="@color/colorBackgroundWhite"

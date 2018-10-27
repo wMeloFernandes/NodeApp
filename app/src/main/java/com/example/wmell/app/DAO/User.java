@@ -20,6 +20,9 @@ public class User {
     @SerializedName("email")
     @Expose
     private String email;
+    @SerializedName("permissions")
+    @Expose
+    private String permissions;
 
     public Integer getStatus() {
         return status;
@@ -59,6 +62,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(String permissions) {
+        this.permissions = permissions;
     }
 
 }

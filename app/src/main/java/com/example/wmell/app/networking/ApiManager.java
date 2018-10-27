@@ -6,23 +6,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiManager {
 
-    private static DigitalKeyApi service;
-    private static ApiManager apiManager;
 
-    private ApiManager() {
+    public static DigitalKeyApi getService() {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
+                .baseUrl("http://192.168.0.2:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        service = retrofit.create(DigitalKeyApi.class);
-    }
-
-    public static ApiManager getInstance() {
-        if (apiManager == null) {
-            apiManager = new ApiManager();
-        }
-        return apiManager;
+        return retrofit.create(DigitalKeyApi.class);
     }
 }

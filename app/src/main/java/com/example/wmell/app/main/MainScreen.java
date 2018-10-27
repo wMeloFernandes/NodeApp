@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,21 +26,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.wmell.app.DAO.Gates;
+import com.example.wmell.app.DAO.Historical;
+import com.example.wmell.app.DAO.HistoricalUserList;
+import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
+import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallback;
+import com.example.wmell.app.util.Utils;
 
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.PERMISSION_DENIED;
 import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
 import static com.example.wmell.app.util.Constants.PERMISSION_REQUESTED;
+import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class MainScreen extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ServerCallback {
@@ -51,6 +62,10 @@ public class MainScreen extends AppCompatActivity
     private RecyclerView.LayoutManager mLayoutManager;
     public static Gates mGatesDAO;
     private GatesAdapter mGateAdapter;
+    private HistoricalAdapter mHistoricalAdapter;
+    private List<Historical> mHistoricalList;
+    private SharedPreferences mSharedPreferences;
+    private List<Integer> mPermissionsUsergates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,14 +74,17 @@ public class MainScreen extends AppCompatActivity
         setTitle(R.string.title_activity_main_screen2);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mSharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
 
-        //getUserInformations
+
         getGatesList(new ServerCallback() {
             @Override
             public void onFail(Throwable throwable) {
                 mLinerarLayoutMain.setVisibility(View.GONE);
                 mRecyclerViewData.setVisibility(View.VISIBLE);
-                mGatesDAO.getGates().clear();
+                if (mGatesDAO != null) {
+                    mGatesDAO.getGates().clear();
+                }
             }
 
             @Override
@@ -88,12 +106,17 @@ public class MainScreen extends AppCompatActivity
                 }));
 
                 mGatesDAO = gates;
-                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
+                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates); //VERIFICAR O UPDATE
                 mRecyclerViewData.setAdapter(mGateAdapter);
             }
 
             @Override
             public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+            }
+
+            @Override
+            public void onSuccess(HistoricalUserList historicalUserList) {
 
             }
         });
@@ -109,8 +132,9 @@ public class MainScreen extends AppCompatActivity
 
         TextView name = headerLayout.findViewById(R.id.nameView);
         TextView email = headerLayout.findViewById(R.id.emailView);
-        //name.setText(mUserText.getUsername());
-        //email.setText(mUserText.getEmail());
+        name.setText(mSharedPreferences.getString(USERNAME_PREFERENCE, ""));
+        email.setText(mSharedPreferences.getString(EMAIL_PREFERENCE, ""));
+        mPermissionsUsergates = Utils.parsePermissions(mSharedPreferences.getString(PERMISSIONS_PREFERENCE, ""));
 
         mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
         mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
@@ -151,6 +175,8 @@ public class MainScreen extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_update) {
+            setTitle(getString(R.string.title_main_activity_gates));
+            //updatePermissionsUser();
             getGatesList(new ServerCallback() {
                 @Override
                 public void onFail(Throwable throwable) {
@@ -178,13 +204,18 @@ public class MainScreen extends AppCompatActivity
                     }));
 
                     mGatesDAO = gates;
-                    mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO);
+                    mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates);
                     mRecyclerViewData.setAdapter(mGateAdapter);
                     Toast.makeText(MainScreen.this, "Gates list updated!", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
                 public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+                }
+
+                @Override
+                public void onSuccess(HistoricalUserList historicalUserList) {
 
                 }
 
@@ -204,8 +235,45 @@ public class MainScreen extends AppCompatActivity
         if (id == R.id.nav_permissionsOnHold) {
             // Filtrar permissões ON HOLD
         } else if (id == R.id.nav_history) {
-            //Pegar historico do Servidor
+            getUserHistorical(new ServerCallback() {
+                @Override
+                public void onSuccess(Gates gates) {
+                }
+
+                @Override
+                public void onSuccess(com.example.wmell.app.DAO.Response response) {
+                }
+
+                @Override
+                public void onSuccess(HistoricalUserList historicalUserList) {
+                    setTitle(getString(R.string.title_main_activity_historical));
+                    mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    mRecyclerViewData.setLayoutManager(mLayoutManager);
+                    mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+                        @Override
+                        public void onClick(View view, int position) {
+                        }
+
+                        @Override
+                        public void onLongClick(View view, int position) {
+                        }
+                    }));
+
+                    mHistoricalList = historicalUserList.getHistorical();
+                    mHistoricalAdapter = new HistoricalAdapter(getApplicationContext(), mHistoricalList);
+                    mRecyclerViewData.setAdapter(mHistoricalAdapter);
+                    Toast.makeText(MainScreen.this, "Historical list updated!", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onFail(Throwable throwable) {
+                    Toast.makeText(MainScreen.this, "There was a requisition problem. Try again later!", Toast.LENGTH_SHORT).show();
+                }
+            });
         } else if (id == R.id.nav_logout) {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.clear();
+            editor.apply();
             startActivity(new Intent(MainScreen.this, LoginApplication.class));
         }
 
@@ -216,17 +284,18 @@ public class MainScreen extends AppCompatActivity
 
     @Override
     public void onFail(Throwable throwable) {
-
     }
 
     @Override
     public void onSuccess(Gates gates) {
-
     }
 
     @Override
     public void onSuccess(com.example.wmell.app.DAO.Response response) {
+    }
 
+    @Override
+    public void onSuccess(HistoricalUserList historicalUserList) {
     }
 
 
@@ -315,12 +384,7 @@ public class MainScreen extends AppCompatActivity
     }
 
     public void getGatesList(final ServerCallback serverCallback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+        DigitalKeyApi service = ApiManager.getService();
 
         Call<Gates> call = service.getGates();
 
@@ -341,4 +405,28 @@ public class MainScreen extends AppCompatActivity
             }
         });
     }
+
+    public void getUserHistorical(final ServerCallback serverCallback) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<HistoricalUserList> call = service.getUserHistorical(mSharedPreferences.getInt(USERID_PREFERENCE, 0));
+
+        call.enqueue(new Callback<HistoricalUserList>() {
+            @Override
+            public void onResponse(Call<HistoricalUserList> call, Response<HistoricalUserList> response) {
+                if (response.isSuccessful()) {
+                    HistoricalUserList historicalUserList = response.body();
+                    serverCallback.onSuccess(historicalUserList);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HistoricalUserList> call, Throwable t) {
+                Toast.makeText(MainScreen.this, "There was a requisition problem. Try again later!", Toast.LENGTH_SHORT).show();
+                serverCallback.onFail(t);
+            }
+        });
+    }
+
+
 }

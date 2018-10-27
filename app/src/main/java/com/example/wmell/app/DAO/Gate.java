@@ -3,9 +3,6 @@ package com.example.wmell.app.DAO;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by wmell on 22/10/2018.
- */
 public class Gate {
 
     @SerializedName("gate_id")
@@ -20,6 +17,9 @@ public class Gate {
     @SerializedName("last_access")
     @Expose
     private String lastAccess;
+    @SerializedName("permissions")
+    @Expose
+    private String permissions;
 
     public Integer getGateId() {
         return gateId;
@@ -52,4 +52,13 @@ public class Gate {
     public void setLastAccess(String lastAccess) {
         this.lastAccess = lastAccess;
     }
+
+    public String getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(String permissions) {
+        this.permissions = permissions;
+    }
+
 }

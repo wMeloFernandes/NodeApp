@@ -1,7 +1,9 @@
 package com.example.wmell.app.login;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,24 +14,31 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.wmell.app.DAO.Gates;
-import com.example.wmell.app.DAO.Response;
+import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.features.ActivateFeatures;
 import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
-import com.example.wmell.app.networking.ServerCallback;
+import com.example.wmell.app.networking.ServerCallbackLogin;
 import com.example.wmell.app.util.Utils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
 
 import static com.example.wmell.app.features.FeaturesName.FINGERPRINT_AUTHENTICATION;
+import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 import static com.example.wmell.app.util.Constants.FEATURE_ENABLE;
+import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
+import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
+import static com.example.wmell.app.util.Constants.SHOW_LOGIN_ACTIVITY_PREFERENCES;
+import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES_KEY;
+import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
-public class LoginApplication extends AppCompatActivity implements ServerCallback {
+public class LoginApplication extends AppCompatActivity implements ServerCallbackLogin {
 
     private EditText email;
     private EditText password;
@@ -74,16 +83,28 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                     mEmail = email.getText().toString();
                     mPassword = password.getText().toString();
 
-                    checkUserAccess(new ServerCallback() {
-                        @Override
-                        public void onSuccess(Gates gates) {
-                        }
+                    checkUserAccess(new ServerCallbackLogin() {
 
                         @Override
-                        public void onSuccess(Response response) {
-                            if (Integer.valueOf(response.getStatus()) == 200) {
+                        public void onSuccess(User user) {
+                            if (Integer.valueOf(user.getStatus()) == 200) {
+
+                                SharedPreferences sharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(USERNAME_PREFERENCE, user.getUsername());
+                                editor.putString(EMAIL_PREFERENCE, user.getEmail());
+                                editor.putInt(USERID_PREFERENCE, user.getUserId());
+                                editor.putString(LASTACCESS_PREFERENCE, user.getLastAccess());
+                                editor.putString(PERMISSIONS_PREFERENCE, user.getPermissions());
+                                editor.apply();
+
+                                sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES_KEY, Context.MODE_PRIVATE);
+                                editor = sharedPreferences.edit();
+                                editor.putBoolean(SHOW_LOGIN_ACTIVITY_PREFERENCES, false);
+                                editor.apply();
+
                                 startActivity(new Intent(LoginApplication.this, MainScreen.class));
-                            } else if (Integer.valueOf(response.getStatus()) == 404) {
+                            } else if (Integer.valueOf(user.getStatus()) == 404) {
                                 Toast.makeText(LoginApplication.this, "E-mail doesn't exist!", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(LoginApplication.this, "There is a problem with your account. Contact the administrator!", Toast.LENGTH_SHORT).show();
@@ -112,38 +133,30 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
     }
 
     @Override
-    public void onSuccess(Gates gates) {
-    }
+    public void onSuccess(User use) {
 
-    @Override
-    public void onSuccess(Response response) {
     }
 
     @Override
     public void onFail(Throwable throwable) {
     }
 
-    public void checkUserAccess(final ServerCallback serverCallback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    public void checkUserAccess(final ServerCallbackLogin serverCallback) {
+        DigitalKeyApi service = ApiManager.getService();
 
-        DigitalKeyApi service = retrofit.create(DigitalKeyApi.class);
+        Call<User> call = service.checkUserAccess(mEmail, mPassword);
 
-        Call<Response> call = service.checkUserAccess(mEmail, mPassword);
-
-        call.enqueue(new Callback<Response>() {
+        call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<com.example.wmell.app.DAO.Response> call, retrofit2.Response<Response> response) {
+            public void onResponse(Call<com.example.wmell.app.DAO.User> call, retrofit2.Response<User> response) {
                 if (response.isSuccessful()) {
-                    com.example.wmell.app.DAO.Response response1 = response.body();
+                    com.example.wmell.app.DAO.User response1 = response.body();
                     serverCallback.onSuccess(response1);
                 }
             }
 
             @Override
-            public void onFailure(Call<com.example.wmell.app.DAO.Response> call, Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 serverCallback.onFail(t);
             }
         });

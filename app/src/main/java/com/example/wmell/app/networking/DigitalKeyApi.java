@@ -1,8 +1,11 @@
 package com.example.wmell.app.networking;
 
 import com.example.wmell.app.DAO.Gates;
+import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Response;
+import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
 import com.example.wmell.app.DAO.ResponseRegister;
+import com.example.wmell.app.DAO.User;
 
 
 import retrofit2.Call;
@@ -23,14 +26,14 @@ public interface DigitalKeyApi {
     @POST("/newUser")
     @FormUrlEncoded
     Call<ResponseRegister> createNewUser(@Field("username") String username,
-                                 @Field("password") String password,
-                                 @Field("permissions") String permissions,
-                                 @Field("email") String email);
+                                         @Field("password") String password,
+                                         @Field("permissions") String permissions,
+                                         @Field("email") String email);
 
     @POST("/userAccess")
     @FormUrlEncoded
-    Call<Response> checkUserAccess(@Field("email") String email,
-                                   @Field("password") String password);
+    Call<User> checkUserAccess(@Field("email") String email,
+                               @Field("password") String password);
 
 
     @POST("/recoverPassword")
@@ -39,10 +42,17 @@ public interface DigitalKeyApi {
                                        @Field("email") String email);
 
 
-    @POST("recoverPasswordAfterChecked")
+    @POST("/recoverPasswordAfterChecked")
     @FormUrlEncoded
-    Call<Response> updatePassword(@Field("user_id") String user_id,
-                                  @Field("password") String password);
+    Call<ResponseRegister> updatePassword(@Field("user_id") String user_id,
+                                          @Field("password") String password);
 
+    @POST("/getUserHistorical")
+    @FormUrlEncoded
+    Call<HistoricalUserList> getUserHistorical(@Field("user_id") int user_id);
+
+    @POST("/getUserPermissions")
+    @FormUrlEncoded
+    Call<ResponsePermissionsUpdate> getUserPermissions(@Field("user_id") int user_id);
 
 }
