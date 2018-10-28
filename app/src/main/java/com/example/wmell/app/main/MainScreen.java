@@ -86,7 +86,17 @@ public class MainScreen extends AppCompatActivity
         setSupportActionBar(toolbar);
         mSharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
 
+        getPermissionsOnHold(new ServerCallbackPermissionsStatus() {
+            @Override
+            public void onSuccess(Permissions permissions) {
+                mPermissions = permissions.getPermissions();
+            }
 
+            @Override
+            public void onFail(Throwable throwable) {
+                Log.v("WILLIAN", throwable.getMessage());
+            }
+        });
         getGatesList(new ServerCallback() {
             @Override
             public void onFail(Throwable throwable) {
@@ -106,8 +116,8 @@ public class MainScreen extends AppCompatActivity
                 mRecyclerViewData.setLayoutManager(mLayoutManager);
                 mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
                     @Override
-                    public void onClick(View view, int position) {
-                        startActivity(new Intent(MainScreen.this, GateDetails.class));
+                    public void onClick(View view, final int position) {
+                        onClickRequest(position);
                     }
 
                     @Override
@@ -116,7 +126,7 @@ public class MainScreen extends AppCompatActivity
                 }));
 
                 mGatesDAO = gates;
-                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates); //VERIFICAR O UPDATE
+                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates, mPermissions);
                 mRecyclerViewData.setAdapter(mGateAdapter);
             }
 
@@ -216,31 +226,34 @@ public class MainScreen extends AppCompatActivity
                     //Setting RecyclerView
                     mLayoutManager = new LinearLayoutManager(getApplicationContext());
                     mRecyclerViewData.setLayoutManager(mLayoutManager);
-                    mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
-                        @Override
-                        public void onClick(View view, int position) {
-                            //startActivity(new Intent(MainScreen.this, GateDetails.class));
-                        }
-
-                        @Override
-                        public void onLongClick(View view, int position) {
-                        }
-                    }));
+//                    mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+//                        @Override
+//                        public void onClick(View view, int position) {
+//                            onClickRequest(position);
+//                        }
+//
+//                        @Override
+//                        public void onLongClick(View view, int position) {
+//                        }
+//                    }));
 
                     mGatesDAO = gates;
-                    mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates);
+                    mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates, mPermissions);
                     mRecyclerViewData.setAdapter(mGateAdapter);
-                    Toast.makeText(MainScreen.this, "Gates list updated!", Toast.LENGTH_LONG).show();
+                    if (mGatesDAO.getGates().size() == 0) {
+                        Toast.makeText(MainScreen.this, "There is no gates list!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainScreen.this, "Gates list updated!", Toast.LENGTH_LONG).show();
+
+                    }
                 }
 
                 @Override
                 public void onSuccess(com.example.wmell.app.DAO.Response response) {
-
                 }
 
                 @Override
                 public void onSuccess(HistoricalUserList historicalUserList) {
-
                 }
 
             });
@@ -280,7 +293,9 @@ public class MainScreen extends AppCompatActivity
                     mPermissions = permissions.getPermissions();
                     mPermissionsAdapter = new PermissionsAdapter(getApplicationContext(), mPermissions);
                     mRecyclerViewDataPermissions.setAdapter(mPermissionsAdapter);
-                    Toast.makeText(MainScreen.this, "On hold permissions list updated!", Toast.LENGTH_SHORT).show();
+                    if (mPermissions.size() == 0) {
+                        Toast.makeText(MainScreen.this, "There is no On hold permissions!", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -320,7 +335,9 @@ public class MainScreen extends AppCompatActivity
                     mHistoricalList = historicalUserList.getHistorical();
                     mHistoricalAdapter = new HistoricalAdapter(getApplicationContext(), mHistoricalList);
                     mRecyclerViewDataHistorical.setAdapter(mHistoricalAdapter);
-                    Toast.makeText(MainScreen.this, "Historical list updated!", Toast.LENGTH_SHORT).show();
+                    if (mHistoricalList.size() == 0) {
+                        Toast.makeText(MainScreen.this, "There is no Historical list!", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -514,7 +531,6 @@ public class MainScreen extends AppCompatActivity
         DigitalKeyApi service = ApiManager.getService();
 
         Call<Permissions> call = service.getUserPermissions(mSharedPreferences.getInt(USERID_PREFERENCE, 0));
-        Log.v("WILLIAN", String.valueOf(getSharedPreferences(USERID_PREFERENCE, 0)));
         call.enqueue(new Callback<Permissions>() {
             @Override
             public void onResponse(Call<Permissions> call, Response<Permissions> response) {
@@ -548,6 +564,73 @@ public class MainScreen extends AppCompatActivity
             @Override
             public void onFailure(Call<ResponseUpdatePermissions> call, Throwable t) {
                 Toast.makeText(MainScreen.this, "There was a problem to update gates. Try again later!", Toast.LENGTH_SHORT).show();
+                serverCallback.onFail(t);
+            }
+        });
+    }
+
+    private void onClickRequest(final int position) {
+        if (mGatesDAO.getGates().get(position).getmStatus() == 1) {
+            Toast.makeText(MainScreen.this, "You have already made a request for this port! Wait for manager's approval!", Toast.LENGTH_SHORT).show();
+        } else if (mGatesDAO.getGates().get(position).getmStatus() == 2) {
+            startActivity(new Intent(MainScreen.this, GateDetails.class));
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainScreen.this, R.style.Theme_AppCompat));
+            builder.setMessage("You don't have access to this gate. Would you like to request it?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    makeNewRequestAccess(new ServerCallback() {
+                        @Override
+                        public void onSuccess(Gates gates) {
+                        }
+
+                        @Override
+                        public void onSuccess(com.example.wmell.app.DAO.Response response) {
+                            if (Integer.valueOf(response.getStatus()) == 200) {
+                                Toast.makeText(MainScreen.this, "Successful request!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MainScreen.this, "Error: " + response.getStatus() + "!\nTry again later!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onSuccess(HistoricalUserList historicalUserList) {
+                        }
+
+                        @Override
+                        public void onFail(Throwable throwable) {
+                            Log.v("WILLIAN", throwable.getMessage());
+                            Toast.makeText(MainScreen.this, "Error to request access. Try again!", Toast.LENGTH_SHORT).show();
+                        }
+                    }, position);
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+
+    }
+
+    private void makeNewRequestAccess(final ServerCallback serverCallback, int position) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<com.example.wmell.app.DAO.Response> call = service.makeRequestAccess(getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0), mGatesDAO.getGates().get(position).getGateId(), mGatesDAO.getGates().get(position).getName());
+        call.enqueue(new Callback<com.example.wmell.app.DAO.Response>() {
+            @Override
+            public void onResponse(Call<com.example.wmell.app.DAO.Response> call, Response<com.example.wmell.app.DAO.Response> response) {
+                if (response.isSuccessful()) {
+                    com.example.wmell.app.DAO.Response response1 = response.body();
+                    serverCallback.onSuccess(response1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.example.wmell.app.DAO.Response> call, Throwable t) {
                 serverCallback.onFail(t);
             }
         });

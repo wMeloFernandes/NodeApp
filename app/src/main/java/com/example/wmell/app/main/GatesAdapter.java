@@ -11,8 +11,13 @@ import android.widget.TextView;
 
 import com.example.wmell.app.DAO.*;
 import com.example.wmell.app.R;
+import com.example.wmell.app.util.Constants;
 
 import java.util.List;
+
+import static com.example.wmell.app.util.Constants.HAS_ACCESS;
+import static com.example.wmell.app.util.Constants.HOLD_ACCESS;
+import static com.example.wmell.app.util.Constants.NO_ACCESS;
 
 
 public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHolder> {
@@ -21,12 +26,14 @@ public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHold
     private Context mContext;
     private Gates mGates;
     private List<Integer> mPermissionsUser;
+    private List<ResponsePermissionsUpdate> mPermissionsOnHold;
 
 
-    public GatesAdapter(Context context, Gates gates, List<Integer> permissionsUser) {
+    public GatesAdapter(Context context, Gates gates, List<Integer> permissionsUser, List<ResponsePermissionsUpdate> permissionsOnHold) {
         mContext = context;
         mGates = gates;
         mPermissionsUser = permissionsUser;
+        mPermissionsOnHold = permissionsOnHold;
     }
 
     @Override
@@ -37,22 +44,32 @@ public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHold
 
     @Override
     public void onBindViewHolder(GateViewHolder holder, int position) {
-        boolean hasAccess = false;
-        //Gate gate = mGates.getGates().get(position);
+        int noAccessValue = 0;
         com.example.wmell.app.DAO.Gate gate = mGates.getGates().get(position);
         holder.viewImageIcon.setImageResource(R.drawable.door);
         holder.viewName.setText(gate.getName());
 
         for (int i = 0; i < mPermissionsUser.size(); i++) {
             if (mPermissionsUser.get(i) == gate.getGateId()) {
-                hasAccess = true;
+                holder.viewLock.setImageResource(R.drawable.green_padlock);
+                gate.setmStatus(HAS_ACCESS);
+                noAccessValue++;
             }
         }
-        if (hasAccess) {
-            holder.viewLock.setImageResource(R.drawable.green_padlock);
-        } else {
-            holder.viewLock.setImageResource(R.drawable.red_padlocl);
+
+        if (mPermissionsOnHold != null) {
+            for (int i = 0; i < mPermissionsOnHold.size(); i++) {
+                if (mPermissionsOnHold.get(i).getGateId() == gate.getGateId()) {
+                    holder.viewLock.setImageResource(R.drawable.yellow_padlock);
+                    gate.setmStatus(HOLD_ACCESS);
+                    noAccessValue++;
+                }
+            }
         }
+        if (noAccessValue == 0) {
+            gate.setmStatus(NO_ACCESS);
+        }
+
     }
 
     @Override

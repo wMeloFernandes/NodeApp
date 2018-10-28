@@ -61,4 +61,10 @@ public interface DigitalKeyApi {
     @FormUrlEncoded
     Call<ResponseUpdatePermissions> updateUserPermissions(@Field("user_id") int user_id);
 
+    @POST("/makeRequestForAccess")
+    @FormUrlEncoded
+    Call<Response> makeRequestAccess(@Field("user_id") int user_id,
+                                     @Field("gate_id") int gate_id,
+                                     @Field("gate_name") String gate_name);
+
 }

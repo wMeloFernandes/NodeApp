@@ -21,6 +21,8 @@ public class Gate {
     @Expose
     private String permissions;
 
+    private int mStatus;
+
     public Integer getGateId() {
         return gateId;
     }
@@ -61,4 +63,11 @@ public class Gate {
         this.permissions = permissions;
     }
 
+    public int getmStatus() {
+        return mStatus;
+    }
+
+    public void setmStatus(int mStatus) {
+        this.mStatus = mStatus;
+    }
 }
