@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
@@ -30,12 +31,12 @@ import retrofit2.Callback;
 import static com.example.wmell.app.features.FeaturesName.FINGERPRINT_AUTHENTICATION;
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 import static com.example.wmell.app.util.Constants.FEATURE_ENABLE;
+import static com.example.wmell.app.util.Constants.IS_USER_LOGIN;
 import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
-import static com.example.wmell.app.util.Constants.SHOW_LOGIN_ACTIVITY_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
-import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES_KEY;
+import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class LoginApplication extends AppCompatActivity implements ServerCallbackLogin {
@@ -51,6 +52,9 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
         setContentView(R.layout.login_application);
         getSupportActionBar().hide();
 
+        if (getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE).getBoolean(IS_USER_LOGIN, false)) {
+            startActivity(new Intent(LoginApplication.this, MainScreen.class));
+        }
 
         email = findViewById(R.id.editText_email);
         password = findViewById(R.id.editText_password);
@@ -96,12 +100,12 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                                 editor.putInt(USERID_PREFERENCE, user.getUserId());
                                 editor.putString(LASTACCESS_PREFERENCE, user.getLastAccess());
                                 editor.putString(PERMISSIONS_PREFERENCE, user.getPermissions());
-                                editor.apply();
+                                editor.commit();
 
-                                sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES_KEY, Context.MODE_PRIVATE);
+                                sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);
                                 editor = sharedPreferences.edit();
-                                editor.putBoolean(SHOW_LOGIN_ACTIVITY_PREFERENCES, false);
-                                editor.apply();
+                                editor.putBoolean(IS_USER_LOGIN, true);
+                                editor.commit();
 
                                 startActivity(new Intent(LoginApplication.this, MainScreen.class));
                             } else if (Integer.valueOf(user.getStatus()) == 404) {

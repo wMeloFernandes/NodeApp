@@ -55,6 +55,7 @@ import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
 import static com.example.wmell.app.util.Constants.PERMISSION_REQUESTED;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class MainScreen extends AppCompatActivity
@@ -166,7 +167,7 @@ public class MainScreen extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            moveTaskToBack(true);
         }
     }
 
@@ -268,6 +269,7 @@ public class MainScreen extends AppCompatActivity
                     mRecyclerViewDataPermissions.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewDataPermissions, new ClickListenerRecyclerView() {
                         @Override
                         public void onClick(View view, int position) {
+                            Toast.makeText(MainScreen.this, "You have already made a request for this port! Wait for manager's approval!", Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
@@ -327,10 +329,24 @@ public class MainScreen extends AppCompatActivity
                 }
             });
         } else if (id == R.id.nav_logout) {
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.clear();
-            editor.apply();
-            startActivity(new Intent(MainScreen.this, LoginApplication.class));
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainScreen.this, R.style.Theme_AppCompat));
+            builder.setMessage("Do you wanna quit?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SharedPreferences sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.clear();
+                    editor.commit();
+                    startActivity(new Intent(MainScreen.this, LoginApplication.class));
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

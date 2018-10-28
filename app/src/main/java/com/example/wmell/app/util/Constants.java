@@ -13,8 +13,8 @@ public class Constants {
     public static final int SERVER_PERMISSION_GRANTED = 200;
     public static final int SERVER_PERMISSION_DENIED = 403;
 
-    public static final String USER_LOGIN_PREFERENCES_KEY = "USER_LOGIN_PREFERENCES";
-    public static final String SHOW_LOGIN_ACTIVITY_PREFERENCES = "SHOW_LOGIN_ACTIVITY_PREFERENCES";
+    public static final String USER_LOGIN_PREFERENCES = "USER_LOGIN_PREFERENCES";
+    public static final String IS_USER_LOGIN = "IS_USER_LOGIN";
 
     public static final String USER_PREFERENCES = "USER_PREFERENCES";
     public static final String USERNAME_PREFERENCE = "USERNAME_PREFERENCE";

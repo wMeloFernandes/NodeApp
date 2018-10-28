@@ -39,24 +39,6 @@ public class Utils {
         }
     }
 
-    public static void getServerPermissionStatus(int permission, Context context) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setContentTitle("Access Request");
-        builder.setStyle(new NotificationCompat.BigTextStyle());
-        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-        builder.setAutoCancel(true);
-        builder.setDefaults(NotificationCompat.DEFAULT_ALL);
-
-        if (Constants.SERVER_PERMISSION_GRANTED == permission) {
-            builder.setContentText("Your request was approved!");
-            builder.setSmallIcon(R.drawable.green_padlock);
-        } else if (Constants.SERVER_PERMISSION_DENIED == permission) {
-            builder.setContentText("Your request was rejected!");
-            builder.setSmallIcon(R.drawable.red_padlocl);
-        }
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, builder.build());
-    }
 
     public static List<Integer> parsePermissions(String permissions) {
         List<String> result = new ArrayList<>();
