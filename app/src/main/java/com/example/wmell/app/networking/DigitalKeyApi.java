@@ -2,9 +2,11 @@ package com.example.wmell.app.networking;
 
 import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.HistoricalUserList;
+import com.example.wmell.app.DAO.Permissions;
 import com.example.wmell.app.DAO.Response;
 import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
 import com.example.wmell.app.DAO.ResponseRegister;
+import com.example.wmell.app.DAO.ResponseUpdatePermissions;
 import com.example.wmell.app.DAO.User;
 
 
@@ -51,8 +53,12 @@ public interface DigitalKeyApi {
     @FormUrlEncoded
     Call<HistoricalUserList> getUserHistorical(@Field("user_id") int user_id);
 
-    @POST("/getUserPermissions")
+    @POST("/getOnHoldPermissions")
     @FormUrlEncoded
-    Call<ResponsePermissionsUpdate> getUserPermissions(@Field("user_id") int user_id);
+    Call<Permissions> getUserPermissions(@Field("user_id") int user_id);
+
+    @POST("/updateUserPermissionsList")
+    @FormUrlEncoded
+    Call<ResponseUpdatePermissions> updateUserPermissions(@Field("user_id") int user_id);
 
 }

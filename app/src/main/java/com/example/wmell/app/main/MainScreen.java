@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -28,12 +29,16 @@ import android.widget.Toast;
 import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.Historical;
 import com.example.wmell.app.DAO.HistoricalUserList;
+import com.example.wmell.app.DAO.Permissions;
 import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
+import com.example.wmell.app.DAO.ResponseUpdatePermissions;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallback;
+import com.example.wmell.app.networking.ServerCallbackPermissionsStatus;
+import com.example.wmell.app.networking.ServerCallbackUpdatePermissions;
 import com.example.wmell.app.util.Utils;
 
 
@@ -53,19 +58,23 @@ import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class MainScreen extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ServerCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, ServerCallback, ServerCallbackPermissionsStatus, ServerCallbackUpdatePermissions {
 
     private static LinearLayout mLinerarLayoutMain;
     private ProgressBar mProgressBarMain;
     private TextView mTextViewMain;
     private static RecyclerView mRecyclerViewData;
+    private static RecyclerView mRecyclerViewDataHistorical;
+    private static RecyclerView mRecyclerViewDataPermissions;
     private RecyclerView.LayoutManager mLayoutManager;
     public static Gates mGatesDAO;
     private GatesAdapter mGateAdapter;
     private HistoricalAdapter mHistoricalAdapter;
+    private PermissionsAdapter mPermissionsAdapter;
     private List<Historical> mHistoricalList;
     private SharedPreferences mSharedPreferences;
-    private List<Integer> mPermissionsUsergates;
+    private static List<Integer> mPermissionsUsergates;
+    private List<ResponsePermissionsUpdate> mPermissions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +149,8 @@ public class MainScreen extends AppCompatActivity
         mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
         mTextViewMain = findViewById(R.id.textView_mainScreen);
         mRecyclerViewData = findViewById(R.id.recyclerView_mainScreen);
+        mRecyclerViewDataHistorical = findViewById(R.id.recyclerView_Historical);
+        mRecyclerViewDataPermissions = findViewById(R.id.recyclerView_OnHoldPermissions);
 
         mLinerarLayoutMain.setVisibility(View.VISIBLE);
         mRecyclerViewData.setVisibility(View.GONE);
@@ -173,10 +184,20 @@ public class MainScreen extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_update) {
             setTitle(getString(R.string.title_main_activity_gates));
-            //updatePermissionsUser();
+            updatePermissions(new ServerCallbackUpdatePermissions() {
+                @Override
+                public void onSuccess(ResponseUpdatePermissions response) {
+                    mPermissionsUsergates = Utils.parsePermissions(response.getPermissions().get(0).getPermissions());
+                }
+
+                @Override
+                public void onFail(Throwable throwable) {
+                    Toast.makeText(MainScreen.this, "Try again later!", Toast.LENGTH_SHORT).show();
+                    Log.v("WILLIAN", throwable.getMessage());
+                }
+            });
             getGatesList(new ServerCallback() {
                 @Override
                 public void onFail(Throwable throwable) {
@@ -189,13 +210,15 @@ public class MainScreen extends AppCompatActivity
                 public void onSuccess(Gates gates) {
                     mLinerarLayoutMain.setVisibility(View.GONE);
                     mRecyclerViewData.setVisibility(View.VISIBLE);
+                    mRecyclerViewDataPermissions.setVisibility(View.GONE);
+                    mRecyclerViewDataHistorical.setVisibility(View.GONE);
                     //Setting RecyclerView
                     mLayoutManager = new LinearLayoutManager(getApplicationContext());
                     mRecyclerViewData.setLayoutManager(mLayoutManager);
                     mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
                         @Override
                         public void onClick(View view, int position) {
-                            startActivity(new Intent(MainScreen.this, GateDetails.class));
+                            //startActivity(new Intent(MainScreen.this, GateDetails.class));
                         }
 
                         @Override
@@ -233,7 +256,37 @@ public class MainScreen extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_permissionsOnHold) {
-            // Filtrar permissões ON HOLD
+            getPermissionsOnHold(new ServerCallbackPermissionsStatus() {
+                @Override
+                public void onSuccess(Permissions permissions) {
+                    setTitle("Permissions On Hold");
+                    mRecyclerViewDataPermissions.setVisibility(View.VISIBLE);
+                    mRecyclerViewData.setVisibility(View.GONE);
+                    mRecyclerViewDataHistorical.setVisibility(View.GONE);
+                    mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    mRecyclerViewDataPermissions.setLayoutManager(mLayoutManager);
+                    mRecyclerViewDataPermissions.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewDataPermissions, new ClickListenerRecyclerView() {
+                        @Override
+                        public void onClick(View view, int position) {
+                        }
+
+                        @Override
+                        public void onLongClick(View view, int position) {
+                        }
+                    }));
+
+                    mPermissions = permissions.getPermissions();
+                    mPermissionsAdapter = new PermissionsAdapter(getApplicationContext(), mPermissions);
+                    mRecyclerViewDataPermissions.setAdapter(mPermissionsAdapter);
+                    Toast.makeText(MainScreen.this, "On hold permissions list updated!", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFail(Throwable throwable) {
+                    Toast.makeText(MainScreen.this, "It's no possible get permissions now. Try later!", Toast.LENGTH_SHORT).show();
+                }
+
+            });
         } else if (id == R.id.nav_history) {
             getUserHistorical(new ServerCallback() {
                 @Override
@@ -247,9 +300,12 @@ public class MainScreen extends AppCompatActivity
                 @Override
                 public void onSuccess(HistoricalUserList historicalUserList) {
                     setTitle(getString(R.string.title_main_activity_historical));
+                    mRecyclerViewDataHistorical.setVisibility(View.VISIBLE);
+                    mRecyclerViewData.setVisibility(View.GONE);
+                    mRecyclerViewDataPermissions.setVisibility(View.GONE);
                     mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                    mRecyclerViewData.setLayoutManager(mLayoutManager);
-                    mRecyclerViewData.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+                    mRecyclerViewDataHistorical.setLayoutManager(mLayoutManager);
+                    mRecyclerViewDataHistorical.addOnItemTouchListener(new MainScreen.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
                         @Override
                         public void onClick(View view, int position) {
                         }
@@ -261,8 +317,8 @@ public class MainScreen extends AppCompatActivity
 
                     mHistoricalList = historicalUserList.getHistorical();
                     mHistoricalAdapter = new HistoricalAdapter(getApplicationContext(), mHistoricalList);
-                    mRecyclerViewData.setAdapter(mHistoricalAdapter);
-                    Toast.makeText(MainScreen.this, "Historical list updated!", Toast.LENGTH_LONG).show();
+                    mRecyclerViewDataHistorical.setAdapter(mHistoricalAdapter);
+                    Toast.makeText(MainScreen.this, "Historical list updated!", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -282,6 +338,11 @@ public class MainScreen extends AppCompatActivity
         return true;
     }
 
+
+    @Override
+    public void onSuccess(ResponseUpdatePermissions response) {
+    }
+
     @Override
     public void onFail(Throwable throwable) {
     }
@@ -296,6 +357,11 @@ public class MainScreen extends AppCompatActivity
 
     @Override
     public void onSuccess(HistoricalUserList historicalUserList) {
+    }
+
+    @Override
+    public void onSuccess(Permissions permissions) {
+
     }
 
 
@@ -428,5 +494,47 @@ public class MainScreen extends AppCompatActivity
         });
     }
 
+    public void getPermissionsOnHold(final ServerCallbackPermissionsStatus serverCallback) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<Permissions> call = service.getUserPermissions(mSharedPreferences.getInt(USERID_PREFERENCE, 0));
+        Log.v("WILLIAN", String.valueOf(getSharedPreferences(USERID_PREFERENCE, 0)));
+        call.enqueue(new Callback<Permissions>() {
+            @Override
+            public void onResponse(Call<Permissions> call, Response<Permissions> response) {
+                if (response.isSuccessful()) {
+                    Permissions responsePermissionsUpdate = response.body();
+                    serverCallback.onSuccess(responsePermissionsUpdate);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Permissions> call, Throwable t) {
+                Toast.makeText(MainScreen.this, "There was a problem about your permissions. Try again later!", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+    }
+
+    public void updatePermissions(final ServerCallbackUpdatePermissions serverCallback) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<ResponseUpdatePermissions> call = service.updateUserPermissions(mSharedPreferences.getInt(USERID_PREFERENCE, 0));
+        call.enqueue(new Callback<ResponseUpdatePermissions>() {
+            @Override
+            public void onResponse(Call<ResponseUpdatePermissions> call, Response<ResponseUpdatePermissions> response) {
+                if (response.isSuccessful()) {
+                    ResponseUpdatePermissions responseUpdatePermissions = response.body();
+                    serverCallback.onSuccess(responseUpdatePermissions);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseUpdatePermissions> call, Throwable t) {
+                Toast.makeText(MainScreen.this, "There was a problem to update gates. Try again later!", Toast.LENGTH_SHORT).show();
+                serverCallback.onFail(t);
+            }
+        });
+    }
 
 }

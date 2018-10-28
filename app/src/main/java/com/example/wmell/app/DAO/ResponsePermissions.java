@@ -3,8 +3,7 @@ package com.example.wmell.app.DAO;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-
-public class ResponsePermissionsUpdate {
+public class ResponsePermissions {
 
     @SerializedName("requisition_id")
     @Expose
@@ -21,9 +20,6 @@ public class ResponsePermissionsUpdate {
     @SerializedName("status")
     @Expose
     private Integer status;
-    @SerializedName("gate_name")
-    @Expose
-    private String gateName;
 
     public Integer getRequisitionId() {
         return requisitionId;
@@ -65,11 +61,4 @@ public class ResponsePermissionsUpdate {
         this.status = status;
     }
 
-    public String getGateName() {
-        return gateName;
-    }
-
-    public void setGateName(String gateName) {
-        this.gateName = gateName;
-    }
 }
