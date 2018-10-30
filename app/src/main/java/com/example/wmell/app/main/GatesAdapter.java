@@ -49,11 +49,13 @@ public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHold
         holder.viewImageIcon.setImageResource(R.drawable.door);
         holder.viewName.setText(gate.getName());
 
-        for (int i = 0; i < mPermissionsUser.size(); i++) {
-            if (mPermissionsUser.get(i) == gate.getGateId()) {
-                holder.viewLock.setImageResource(R.drawable.green_padlock);
-                gate.setmStatus(HAS_ACCESS);
-                noAccessValue++;
+        if (mPermissionsUser != null) {
+            for (int i = 0; i < mPermissionsUser.size(); i++) {
+                if (mPermissionsUser.get(i) == gate.getGateId()) {
+                    holder.viewLock.setImageResource(R.drawable.green_padlock);
+                    gate.setmStatus(HAS_ACCESS);
+                    noAccessValue++;
+                }
             }
         }
 

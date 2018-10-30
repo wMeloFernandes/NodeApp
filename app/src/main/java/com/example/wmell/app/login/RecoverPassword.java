@@ -16,10 +16,9 @@ import android.widget.Toast;
 import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Response;
-import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
 import com.example.wmell.app.DAO.ResponseRegister;
 import com.example.wmell.app.R;
-import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallback;
@@ -125,7 +124,7 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                             editor.putString(LASTACCESS_PREFERENCE, response.getLastAccess());
                             editor.apply();
 
-                            startActivity(new Intent(RecoverPassword.this, MainScreen.class));
+                            startActivity(new Intent(RecoverPassword.this, MainActivity.class));
                             Toast.makeText(RecoverPassword.this, "Password changed successful", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(RecoverPassword.this, "Connection Error. Try again later!", Toast.LENGTH_SHORT).show();

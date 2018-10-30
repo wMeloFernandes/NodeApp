@@ -2,6 +2,7 @@ package com.example.wmell.app.main;
 
 import android.Manifest;
 import android.app.KeyguardManager;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -12,11 +13,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.wmell.app.R;
 import com.example.wmell.app.features.ActivateFeatures;
 import com.example.wmell.app.features.FeaturesName;
+import com.example.wmell.app.nfc.CheckUserPasswordActivity;
+import com.example.wmell.app.nfc.NfcSendDataActivity;
 
 import java.security.KeyStore;
 
@@ -66,7 +68,7 @@ public class GateDetails extends AppCompatActivity {
         buttonPIN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(GateDetails.this, "Working!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(GateDetails.this, CheckUserPasswordActivity.class));
             }
         });
     }

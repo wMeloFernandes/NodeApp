@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.example.wmell.app.DAO.ResponseRegister;
 import com.example.wmell.app.R;
-import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallbackRegisterRecover;
@@ -83,7 +83,7 @@ public class RegisterUser extends AppCompatActivity implements ServerCallbackReg
                                 builder.setPositiveButton(getString(R.string.ok_dialog_alert_text), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(RegisterUser.this, MainScreen.class));
+                                        startActivity(new Intent(RegisterUser.this, MainActivity.class));
                                         Toast.makeText(RegisterUser.this, "Your account was successful registered!\nWelcome to Digital Key!", Toast.LENGTH_LONG).show();
                                     }
                                 });

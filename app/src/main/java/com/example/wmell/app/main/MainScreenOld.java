@@ -50,7 +50,7 @@ public class MainScreenOld extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_filter_by:
-                startActivity(new Intent(MainScreenOld.this, MainScreen.class));
+                startActivity(new Intent(MainScreenOld.this, MainActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);

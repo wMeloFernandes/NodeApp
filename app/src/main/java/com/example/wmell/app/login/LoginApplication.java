@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +17,7 @@ import android.widget.Toast;
 import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.features.ActivateFeatures;
-import com.example.wmell.app.main.MainScreen;
+import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallbackLogin;
@@ -53,7 +52,7 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
         getSupportActionBar().hide();
 
         if (getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE).getBoolean(IS_USER_LOGIN, false)) {
-            startActivity(new Intent(LoginApplication.this, MainScreen.class));
+            startActivity(new Intent(LoginApplication.this, MainActivity.class));
         }
 
         email = findViewById(R.id.editText_email);
@@ -107,7 +106,7 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                                 editor.putBoolean(IS_USER_LOGIN, true);
                                 editor.commit();
 
-                                startActivity(new Intent(LoginApplication.this, MainScreen.class));
+                                startActivity(new Intent(LoginApplication.this, MainActivity.class));
                             } else if (Integer.valueOf(user.getStatus()) == 404) {
                                 Toast.makeText(LoginApplication.this, "E-mail doesn't exist!", Toast.LENGTH_SHORT).show();
                             } else {

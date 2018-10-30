@@ -2,7 +2,7 @@ package com.example.wmell.app.networking;
 
 import android.os.CountDownTimer;
 
-import static com.example.wmell.app.main.MainScreen.updateUIFetchingData;
+import static com.example.wmell.app.main.MainActivity.updateUIFetchingData;
 
 /**
  * Created by wmell on 20/10/2018.

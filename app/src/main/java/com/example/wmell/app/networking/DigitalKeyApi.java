@@ -4,7 +4,6 @@ import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Permissions;
 import com.example.wmell.app.DAO.Response;
-import com.example.wmell.app.DAO.ResponsePermissionsUpdate;
 import com.example.wmell.app.DAO.ResponseRegister;
 import com.example.wmell.app.DAO.ResponseUpdatePermissions;
 import com.example.wmell.app.DAO.User;

@@ -3,7 +3,7 @@
     package="com.example.wmell.app">
 
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -32,9 +32,10 @@
             android:screenOrientation="portrait" />
         <activity android:name=".login.RecoverPassword" />
         <activity
-            android:name=".main.MainScreen"
+            android:name=".main.MainActivity"
             android:label="@string/title_activity_main_screen2"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".nfc.NfcSendDataActivity"></activity>
     </application>
 
 </manifest>

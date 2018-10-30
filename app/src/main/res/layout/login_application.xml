@@ -1,9 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryPurple"
+    android:background="@drawable/background_login"
+    android:foregroundTint="#000000"
     android:gravity="bottom"
     android:orientation="vertical">
 
@@ -14,7 +13,8 @@
         android:layout_height="250dp"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo"
+        android:visibility="invisible" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,9 +25,11 @@
 
         <EditText
             android:id="@+id/editText_email"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="16dp"
             android:backgroundTint="@color/colorBackgroundWhite"
             android:foregroundTint="@color/colorBackgroundWhite"
             android:hint="Email"
@@ -40,9 +42,11 @@
 
         <EditText
             android:id="@+id/editText_password"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="16dp"
             android:backgroundTint="@color/colorBackgroundWhite"
             android:foregroundTint="@color/colorBackgroundWhite"
             android:hint="Password"
@@ -60,7 +64,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical">
 
 
@@ -78,13 +81,6 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:layout_gravity="center_horizontal"-->
         <!--android:layout_marginBottom="16dp" />-->
-
-
-        <View
-            android:layout_width="300dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@color/colorBackgroundWhite" />
 
     </LinearLayout>
 
