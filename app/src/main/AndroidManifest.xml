@@ -35,7 +35,8 @@
             android:name=".main.MainActivity"
             android:label="@string/title_activity_main_screen2"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".nfc.NfcSendDataActivity"></activity>
+        <activity android:name=".nfc.NfcSendDataActivity" />
+        <activity android:name=".nfc.CheckUserPasswordActivity"></activity>
     </application>
 
 </manifest>

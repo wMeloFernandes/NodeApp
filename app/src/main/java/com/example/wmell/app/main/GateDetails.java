@@ -18,7 +18,6 @@ import com.example.wmell.app.R;
 import com.example.wmell.app.features.ActivateFeatures;
 import com.example.wmell.app.features.FeaturesName;
 import com.example.wmell.app.nfc.CheckUserPasswordActivity;
-import com.example.wmell.app.nfc.NfcSendDataActivity;
 
 import java.security.KeyStore;
 
@@ -33,6 +32,11 @@ public class GateDetails extends AppCompatActivity {
     private KeyguardManager keyguardManager;
     private KeyStore keyStore;
     private KeyGenerator keyGenerator;
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(GateDetails.this, MainActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
