@@ -76,7 +76,11 @@ public class GatesAdapter extends RecyclerView.Adapter<GatesAdapter.GateViewHold
 
     @Override
     public int getItemCount() {
-        return mGates.getGates().size();
+        if (mGates.getGates() != null) {
+            return mGates.getGates().size();
+        } else {
+            return 0;
+        }
     }
 
     public static class GateViewHolder extends RecyclerView.ViewHolder {

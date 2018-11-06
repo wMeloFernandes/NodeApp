@@ -1,37 +1,26 @@
 package com.example.wmell.app.main;
 
-import android.Manifest;
-import android.app.KeyguardManager;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.security.keystore.KeyProperties;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.wmell.app.R;
-import com.example.wmell.app.features.ActivateFeatures;
-import com.example.wmell.app.features.FeaturesName;
 import com.example.wmell.app.nfc.CheckUserPasswordActivity;
+import com.example.wmell.app.util.Utils;
 
-import java.security.KeyStore;
-
-import javax.crypto.KeyGenerator;
+import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
+import static com.example.wmell.app.util.Constants.GATE_NAME;
 
 
 public class GateDetails extends AppCompatActivity {
 
-
-    private FingerprintManager fingerprintManager;
-    private FingerprintManager.CryptoObject cryptoObject;
-    private KeyguardManager keyguardManager;
-    private KeyStore keyStore;
-    private KeyGenerator keyGenerator;
+    private TextView mGateDetailsName;
+    private TextView mGateDetailsLastAccess;
+    private String mGateName;
+    private String mgateLastAccess;
 
     @Override
     public void onBackPressed() {
@@ -43,31 +32,22 @@ public class GateDetails extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gate_details);
 
+        mGateDetailsName = findViewById(R.id.textView_name_gate_details);
+        mGateDetailsLastAccess = findViewById(R.id.textView_last_access);
         Button buttonPIN = findViewById(R.id.PIN_button);
-        TextView textViewFingerPrint = findViewById(R.id.textView_NFC);
+        mGateDetailsName = findViewById(R.id.textView_name_gate_details);
+        mGateDetailsLastAccess = findViewById(R.id.textView_last_access);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-                fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-                if (fingerprintManager.hasEnrolledFingerprints()) {
-                    try {
-                        generateKey();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-
-            }
-
-        }
-
-        if (ActivateFeatures.isFeatureEnable(FeaturesName.FINGERPRINT_AUTHENTICATION)) {
-            textViewFingerPrint.setVisibility(View.VISIBLE);
+        if (getIntent().getExtras() != null) {
+            mGateName = getIntent().getExtras().getString(GATE_NAME);
+            mgateLastAccess = Utils.parseTimestampSQLToDate(getIntent().getExtras().getString(GATE_LAST_ACCESS));
         } else {
-            textViewFingerPrint.setVisibility(View.GONE);
+            mGateName = "";
+            mgateLastAccess = "";
         }
+        mGateDetailsName.setText(mGateName);
+        mGateDetailsLastAccess.setText("Last access to gate: " + mgateLastAccess);
+        setResult(RESULT_OK);
 
         buttonPIN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,10 +57,4 @@ public class GateDetails extends AppCompatActivity {
         });
     }
 
-    private void generateKey() throws Exception {
-        keyStore = KeyStore.getInstance("AndroidKeyStore");
-        keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
-        keyStore.load(null);
-
-    }
 }

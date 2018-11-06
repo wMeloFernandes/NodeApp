@@ -8,4 +8,6 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorBackgroundMainScreen">#3A3A3A</color>
     <color name="colorAnimationNFC">#782383</color>
+
+    <color name="circleColorPassword">#54185b</color>
 </resources>

@@ -1,5 +1,6 @@
 package com.example.wmell.app.main;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,7 +50,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
+import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
+import static com.example.wmell.app.util.Constants.GATE_NAME;
 import static com.example.wmell.app.util.Constants.HOLD_ACCESS;
+import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.PERMISSION_DENIED;
 import static com.example.wmell.app.util.Constants.PERMISSION_GRANTED;
@@ -63,6 +68,16 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ServerCallback, ServerCallbackPermissionsStatus, ServerCallbackUpdatePermissions {
 
     private static LinearLayout mLinerarLayoutMain;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == GATE_DETAILS_INTENT) {
+            if (resultCode == RESULT_OK) {
+                Log.v("WILLIAN", "Intent working!");
+            }
+        }
+    }
+
     private ProgressBar mProgressBarMain;
     private TextView mTextViewMain;
     private static RecyclerView mRecyclerViewData;
@@ -77,100 +92,6 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences mSharedPreferences;
     private static List<Integer> mPermissionsUsergates;
     private List<ResponsePermissionsUpdate> mPermissions;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_screen2);
-        setTitle(R.string.title_activity_main_screen2);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        mSharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
-
-        getPermissionsOnHold(new ServerCallbackPermissionsStatus() {
-            @Override
-            public void onSuccess(Permissions permissions) {
-                mPermissions = permissions.getPermissions();
-            }
-
-            @Override
-            public void onFail(Throwable throwable) {
-                Log.v("WILLIAN", throwable.getMessage());
-            }
-        });
-        getGatesList(new ServerCallback() {
-            @Override
-            public void onFail(Throwable throwable) {
-                mLinerarLayoutMain.setVisibility(View.GONE);
-                mRecyclerViewData.setVisibility(View.VISIBLE);
-                if (mGatesDAO != null) {
-                    mGatesDAO.getGates().clear();
-                }
-            }
-
-            @Override
-            public void onSuccess(Gates gates) {
-                mLinerarLayoutMain.setVisibility(View.GONE);
-                mRecyclerViewData.setVisibility(View.VISIBLE);
-                //Setting RecyclerView
-                mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                mRecyclerViewData.setLayoutManager(mLayoutManager);
-                mRecyclerViewData.addOnItemTouchListener(new MainActivity.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
-                    @Override
-                    public void onClick(View view, final int position) {
-                        onClickRequest(position);
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
-                mGatesDAO = gates;
-                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates, mPermissions);
-                mRecyclerViewData.setAdapter(mGateAdapter);
-            }
-
-            @Override
-            public void onSuccess(com.example.wmell.app.DAO.Response response) {
-
-            }
-
-            @Override
-            public void onSuccess(HistoricalUserList historicalUserList) {
-
-            }
-        });
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        View headerLayout = navigationView.getHeaderView(0);
-
-        TextView name = headerLayout.findViewById(R.id.nameView);
-        TextView email = headerLayout.findViewById(R.id.emailView);
-        name.setText(mSharedPreferences.getString(USERNAME_PREFERENCE, ""));
-        email.setText(mSharedPreferences.getString(EMAIL_PREFERENCE, ""));
-        mPermissionsUsergates = Utils.parsePermissions(mSharedPreferences.getString(PERMISSIONS_PREFERENCE, ""));
-
-        mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
-        mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
-        mTextViewMain = findViewById(R.id.textView_mainScreen);
-        mRecyclerViewData = findViewById(R.id.recyclerView_mainScreen);
-        mRecyclerViewDataHistorical = findViewById(R.id.recyclerView_Historical);
-        mRecyclerViewDataPermissions = findViewById(R.id.recyclerView_OnHoldPermissions);
-
-        mLinerarLayoutMain.setVisibility(View.VISIBLE);
-        mRecyclerViewData.setVisibility(View.GONE);
-
-        //APIRoutes.waitServerResponse();
-
-
-    }
 
     @Override
     public void onBackPressed() {
@@ -277,9 +198,14 @@ public class MainActivity extends AppCompatActivity
                     mHistoricalList = historicalUserList.getHistorical();
                     mHistoricalAdapter = new HistoricalAdapter(getApplicationContext(), mHistoricalList);
                     mRecyclerViewDataHistorical.setAdapter(mHistoricalAdapter);
-                    if (mHistoricalList.size() == 0) {
+                    if (mHistoricalList != null) {
+                        if (mHistoricalList.size() == 0) {
+                            Toast.makeText(MainActivity.this, "There is no Historical list!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
                         Toast.makeText(MainActivity.this, "There is no Historical list!", Toast.LENGTH_SHORT).show();
                     }
+
                 }
 
                 @Override
@@ -313,6 +239,22 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        initData();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_screen2);
+        setTitle(R.string.title_activity_main_screen2);
+        mSharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+        initView();
+        initData();
+    }
+
 
     @Override
     public void onSuccess(ResponseUpdatePermissions response) {
@@ -339,6 +281,98 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void initView() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View headerLayout = navigationView.getHeaderView(0);
+
+        TextView name = headerLayout.findViewById(R.id.nameView);
+        TextView email = headerLayout.findViewById(R.id.emailView);
+        name.setText(mSharedPreferences.getString(USERNAME_PREFERENCE, ""));
+        email.setText(mSharedPreferences.getString(EMAIL_PREFERENCE, ""));
+        mPermissionsUsergates = Utils.parsePermissions(mSharedPreferences.getString(PERMISSIONS_PREFERENCE, ""));
+
+        mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
+        mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
+        mTextViewMain = findViewById(R.id.textView_mainScreen);
+        mRecyclerViewData = findViewById(R.id.recyclerView_mainScreen);
+        mRecyclerViewDataHistorical = findViewById(R.id.recyclerView_Historical);
+        mRecyclerViewDataPermissions = findViewById(R.id.recyclerView_OnHoldPermissions);
+
+        mLinerarLayoutMain.setVisibility(View.VISIBLE);
+        mRecyclerViewData.setVisibility(View.GONE);
+
+        //APIRoutes.waitServerResponse();
+
+
+    }
+
+    private void initData() {
+        getPermissionsOnHold(new ServerCallbackPermissionsStatus() {
+            @Override
+            public void onSuccess(Permissions permissions) {
+                mPermissions = permissions.getPermissions();
+            }
+
+            @Override
+            public void onFail(Throwable throwable) {
+                Log.v("WILLIAN", throwable.getMessage());
+            }
+        });
+        getGatesList(new ServerCallback() {
+            @Override
+            public void onFail(Throwable throwable) {
+                mLinerarLayoutMain.setVisibility(View.GONE);
+                mRecyclerViewData.setVisibility(View.VISIBLE);
+                if (mGatesDAO != null) {
+                    mGatesDAO.getGates().clear();
+                }
+            }
+
+            @Override
+            public void onSuccess(Gates gates) {
+                mLinerarLayoutMain.setVisibility(View.GONE);
+                mRecyclerViewData.setVisibility(View.VISIBLE);
+                //Setting RecyclerView
+                mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                mRecyclerViewData.setLayoutManager(mLayoutManager);
+                mRecyclerViewData.addOnItemTouchListener(new MainActivity.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
+                    @Override
+                    public void onClick(View view, final int position) {
+                        onClickRequest(position);
+                    }
+
+                    @Override
+                    public void onLongClick(View view, int position) {
+                    }
+                }));
+
+                mGatesDAO = gates;
+                mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesDAO, mPermissionsUsergates, mPermissions);
+                mRecyclerViewData.setAdapter(mGateAdapter);
+            }
+
+            @Override
+            public void onSuccess(com.example.wmell.app.DAO.Response response) {
+
+            }
+
+            @Override
+            public void onSuccess(HistoricalUserList historicalUserList) {
+
+            }
+        });
+
+    }
 
     class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
@@ -574,11 +608,15 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    @SuppressLint("RestrictedApi")
     private void onClickRequest(final int position) {
         if (mGatesDAO.getGates().get(position).getmStatus() == 1) {
             Toast.makeText(MainActivity.this, "You have already made a request for this port! Wait for manager's approval!", Toast.LENGTH_SHORT).show();
         } else if (mGatesDAO.getGates().get(position).getmStatus() == 2) {
-            startActivity(new Intent(MainActivity.this, GateDetails.class));
+            Intent intent = new Intent(MainActivity.this, GateDetails.class);
+            intent.putExtra(GATE_NAME, mGatesDAO.getGates().get(position).getName());
+            intent.putExtra(GATE_LAST_ACCESS, mGatesDAO.getGates().get(position).getLastAccess());
+            startActivityForResult(intent, GATE_DETAILS_INTENT);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.Theme_AppCompat));
             builder.setMessage("You don't have access to this gate. Would you like to request it?");

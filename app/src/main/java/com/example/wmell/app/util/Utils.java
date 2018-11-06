@@ -11,6 +11,8 @@ import android.util.Log;
 
 import com.example.wmell.app.R;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +55,17 @@ public class Utils {
             }
             return list;
         }
+    }
+
+    public static String parseTimestampSQLToDate(String timestampSQL) {
+
+        String day = timestampSQL.substring(8, 10);
+        String month = timestampSQL.substring(5, 7);
+        String year = timestampSQL.substring(0, 4);
+
+        String hour = timestampSQL.substring(11, 16);
+        String time = day + "-" + month + "-" + year + " " + hour;
+        return time;
     }
 }
 

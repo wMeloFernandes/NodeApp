@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="16dp"
@@ -11,34 +9,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:orientation="vertical">
+
 
         <ImageView
             android:id="@+id/imageView_type_gate"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:src="@drawable/door" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/textView_name_gate_details"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="Door 1"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/textView_name_gate_details"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Door 1" />
-
-            <TextView
-                android:id="@+id/textView_last_access"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Last access: March 21, 2018" />
-
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/textView_last_access"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Last access: March 21, 2018"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
@@ -53,14 +47,7 @@
             android:id="@+id/PIN_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PIN" />
-
-        <TextView
-            android:id="@+id/textView_NFC"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Open with Fingerprint" />
+            android:text="Open Gate" />
 
     </LinearLayout>
 

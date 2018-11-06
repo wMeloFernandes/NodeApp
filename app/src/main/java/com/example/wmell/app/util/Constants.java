@@ -22,9 +22,14 @@ public class Constants {
     public static final String PERMISSIONS_PREFERENCE = "PERMISSIONS_PREFERENCE";
 
 
+
     public static final int HAS_ACCESS = 2;
     public static final int NO_ACCESS = 0;
     public static final int HOLD_ACCESS = 1;
+
+    public static final int GATE_DETAILS_INTENT = 101;
+    public static final String GATE_NAME = "GATE_NAME";
+    public static final String GATE_LAST_ACCESS = "GATE_LAST_ACCESS";
 
 
 }
