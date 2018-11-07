@@ -31,6 +31,10 @@ public class Constants {
     public static final int GATE_DETAILS_INTENT = 101;
     public static final String GATE_NAME = "GATE_NAME";
     public static final String GATE_LAST_ACCESS = "GATE_LAST_ACCESS";
+    public static final String GATE_ID = "GATE_ID";
+
+    public static final int SEND_USER_INFORMATIONS_NFC = 0;
+    public static final int SEND_KEY_NFC = 1;
 
 
 }

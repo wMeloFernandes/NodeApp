@@ -11,6 +11,7 @@ import com.example.wmell.app.R;
 import com.example.wmell.app.nfc.CheckUserPasswordActivity;
 import com.example.wmell.app.util.Utils;
 
+import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
 import static com.example.wmell.app.util.Constants.GATE_NAME;
 
@@ -21,6 +22,7 @@ public class GateDetails extends AppCompatActivity {
     private TextView mGateDetailsLastAccess;
     private String mGateName;
     private String mgateLastAccess;
+    private static int mGateID;
 
     @Override
     public void onBackPressed() {
@@ -41,6 +43,7 @@ public class GateDetails extends AppCompatActivity {
         if (getIntent().getExtras() != null) {
             mGateName = getIntent().getExtras().getString(GATE_NAME);
             mgateLastAccess = Utils.parseTimestampSQLToDate(getIntent().getExtras().getString(GATE_LAST_ACCESS));
+            mGateID = getIntent().getExtras().getInt(GATE_ID);
         } else {
             mGateName = "";
             mgateLastAccess = "";
@@ -55,6 +58,10 @@ public class GateDetails extends AppCompatActivity {
                 startActivity(new Intent(GateDetails.this, CheckUserPasswordActivity.class));
             }
         });
+    }
+
+    public static String getGateID() {
+        return String.valueOf(mGateID);
     }
 
 }

@@ -4,6 +4,7 @@ import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Permissions;
 import com.example.wmell.app.DAO.Response;
+import com.example.wmell.app.DAO.ResponseNFC;
 import com.example.wmell.app.DAO.ResponseRegister;
 import com.example.wmell.app.DAO.ResponseUpdatePermissions;
 import com.example.wmell.app.DAO.User;
@@ -65,5 +66,11 @@ public interface DigitalKeyApi {
     Call<Response> makeRequestAccess(@Field("user_id") int user_id,
                                      @Field("gate_id") int gate_id,
                                      @Field("gate_name") String gate_name);
+
+    @POST("/getNFCRequest")
+    @FormUrlEncoded
+    Call<ResponseNFC> makeNfcRequest(@Field("user_id") int user_id,
+                                     @Field("gate_id") int gate_id,
+                                     @Field("nfc_message") String nfcMessage);
 
 }

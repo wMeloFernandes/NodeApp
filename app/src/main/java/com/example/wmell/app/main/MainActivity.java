@@ -51,6 +51,7 @@ import retrofit2.Response;
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
+import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
 import static com.example.wmell.app.util.Constants.GATE_NAME;
 import static com.example.wmell.app.util.Constants.HOLD_ACCESS;
@@ -616,6 +617,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, GateDetails.class);
             intent.putExtra(GATE_NAME, mGatesDAO.getGates().get(position).getName());
             intent.putExtra(GATE_LAST_ACCESS, mGatesDAO.getGates().get(position).getLastAccess());
+            intent.putExtra(GATE_ID, mGatesDAO.getGates().get(position).getGateId());
             startActivityForResult(intent, GATE_DETAILS_INTENT);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.Theme_AppCompat));
