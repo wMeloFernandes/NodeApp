@@ -12,7 +12,9 @@ public class Constants {
 
 
     public static final String USER_LOGIN_PREFERENCES = "USER_LOGIN_PREFERENCES";
+    public static final String USER_TRY_PASSWORD = "USER_TRY_PASSWORD";
     public static final String IS_USER_LOGIN = "IS_USER_LOGIN";
+    public static final String USER_TRIES = "USER_TRIES";
 
     public static final String USER_PREFERENCES = "USER_PREFERENCES";
     public static final String USERNAME_PREFERENCE = "USERNAME_PREFERENCE";
@@ -20,7 +22,6 @@ public class Constants {
     public static final String USERID_PREFERENCE = "USERID_PREFERENCE";
     public static final String LASTACCESS_PREFERENCE = "LASTACCESS_PREFERENCE";
     public static final String PERMISSIONS_PREFERENCE = "PERMISSIONS_PREFERENCE";
-
 
 
     public static final int HAS_ACCESS = 2;

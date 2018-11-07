@@ -14,7 +14,16 @@ import com.skyfishjy.library.RippleBackground;
 
 public class NfcSendDataActivity extends AppCompatActivity {
     @Override
+    protected void onStop() {
+        super.onStop();
+        mCountDownTimer.cancel();
+    }
+
+    private CountDownTimer mCountDownTimer;
+
+    @Override
     public void onBackPressed() {
+        mCountDownTimer.cancel();
         startActivity(new Intent(NfcSendDataActivity.this, GateDetails.class));
     }
 
@@ -24,14 +33,13 @@ public class NfcSendDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_nfc_send_data);
 
         final RippleBackground rippleBackground = findViewById(R.id.content);
-        ImageView imageView = findViewById(R.id.centerImage);
         final TextView timerTextView = findViewById(R.id.tv_timer);
         rippleBackground.startRippleAnimation();
 
-        new CountDownTimer(15000, 1000) {
+        mCountDownTimer = new CountDownTimer(15000, 1000) {
 
             public void onTick(long millisUntilFinished) {
-                timerTextView.setText(String.valueOf(millisUntilFinished/ 1000));
+                timerTextView.setText(String.valueOf(millisUntilFinished / 1000));
             }
 
             public void onFinish() {

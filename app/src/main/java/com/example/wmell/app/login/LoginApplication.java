@@ -37,6 +37,8 @@ import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
+import static com.example.wmell.app.util.Constants.USER_TRIES;
+import static com.example.wmell.app.util.Constants.USER_TRY_PASSWORD;
 
 public class LoginApplication extends AppCompatActivity implements ServerCallbackLogin {
 
@@ -104,6 +106,11 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                                 sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);
                                 editor = sharedPreferences.edit();
                                 editor.putBoolean(IS_USER_LOGIN, true);
+                                editor.commit();
+
+                                sharedPreferences = getSharedPreferences(USER_TRY_PASSWORD, Context.MODE_PRIVATE);
+                                editor = sharedPreferences.edit();
+                                editor.putInt(USER_TRIES, 4);
                                 editor.commit();
 
                                 startActivity(new Intent(LoginApplication.this, MainActivity.class));
