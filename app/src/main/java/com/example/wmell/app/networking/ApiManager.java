@@ -10,7 +10,7 @@ public class ApiManager {
     public static DigitalKeyApi getService() {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.101:8080/")
+                .baseUrl("http://192.168.1.102:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

@@ -47,7 +47,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".nfc.CheckUserPasswordActivity" />
-        <activity android:name=".nfc.NfcCallbackMessage"></activity>
     </application>
 
 </manifest>
