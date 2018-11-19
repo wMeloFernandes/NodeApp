@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Digital Key</string>
 
-
+    <string name="service_apdu_description">serviceAPDUdescription</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_account_sign_up">Create an account\nNot a member?</string>
     <string name="lost_password">Lost Password?\nThats not a problem.</string>

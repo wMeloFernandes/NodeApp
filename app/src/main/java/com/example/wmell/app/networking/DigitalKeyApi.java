@@ -70,7 +70,6 @@ public interface DigitalKeyApi {
     @POST("/getNFCRequest")
     @FormUrlEncoded
     Call<ResponseNFC> makeNfcRequest(@Field("user_id") int user_id,
-                                     @Field("gate_id") int gate_id,
-                                     @Field("nfc_message") String nfcMessage);
+                                     @Field("gate_id") int gate_id);
 
 }

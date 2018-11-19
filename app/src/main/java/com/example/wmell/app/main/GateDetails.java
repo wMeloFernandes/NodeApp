@@ -11,6 +11,7 @@ import com.example.wmell.app.R;
 import com.example.wmell.app.nfc.CheckUserPasswordActivity;
 import com.example.wmell.app.util.Utils;
 
+import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
 import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
 import static com.example.wmell.app.util.Constants.GATE_NAME;
@@ -55,7 +56,9 @@ public class GateDetails extends AppCompatActivity {
         buttonPIN.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(GateDetails.this, CheckUserPasswordActivity.class));
+                Intent intent = new Intent(GateDetails.this, CheckUserPasswordActivity.class);
+                intent.putExtra(GATE_ID, mGateID);
+                startActivityForResult(intent, GATE_DETAILS_INTENT);
             }
         });
     }

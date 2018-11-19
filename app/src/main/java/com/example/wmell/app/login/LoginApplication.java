@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
-import com.example.wmell.app.features.ActivateFeatures;
 import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
@@ -27,9 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 
-import static com.example.wmell.app.features.FeaturesName.FINGERPRINT_AUTHENTICATION;
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
-import static com.example.wmell.app.util.Constants.FEATURE_ENABLE;
 import static com.example.wmell.app.util.Constants.IS_USER_LOGIN;
 import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
@@ -83,8 +80,6 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
             @Override
             public void onClick(View view) {
                 if (Utils.isFilled(email.getText().toString()) && Utils.isFilled(password.getText().toString())) {
-                    //Activate Features
-                    ActivateFeatures.addFeature(FINGERPRINT_AUTHENTICATION, FEATURE_ENABLE);
                     mEmail = email.getText().toString();
                     mPassword = password.getText().toString();
 

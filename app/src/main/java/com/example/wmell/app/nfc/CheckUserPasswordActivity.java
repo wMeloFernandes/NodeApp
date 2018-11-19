@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
+import com.example.wmell.app.main.GateDetails;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallbackLogin;
@@ -27,6 +28,8 @@ import retrofit2.Callback;
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 
 
+import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
+import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_TRIES;
@@ -70,7 +73,9 @@ public class CheckUserPasswordActivity extends AppCompatActivity implements Serv
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 editor.putInt(USER_TRIES, 4);
                                 editor.commit();
-                                startActivity(new Intent(CheckUserPasswordActivity.this, NfcSendDataActivity.class));
+                                Intent intent = new Intent(CheckUserPasswordActivity.this, NfcSendDataActivity.class);
+                                intent.putExtra(GATE_ID, getIntent().getExtras().getInt(GATE_ID));
+                                startActivityForResult(intent, GATE_DETAILS_INTENT);
                             }
                         }
 
