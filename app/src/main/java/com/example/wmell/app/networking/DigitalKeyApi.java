@@ -79,4 +79,10 @@ public interface DigitalKeyApi {
     @POST("/updateGateLastAccess")
     @FormUrlEncoded
     Call<Response> updateGateLastAccess(@Field("gate_id") int gate_id);
+
+    @POST("/updateHistoricalList")
+    @FormUrlEncoded
+    Call<Response> updateHistoricalList(@Field("user_id") int user_id,
+                                        @Field("gate_id") int gate_id,
+                                        @Field("gate_name") String gate_name);
 }

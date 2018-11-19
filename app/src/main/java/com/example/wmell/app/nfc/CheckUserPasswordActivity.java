@@ -32,6 +32,7 @@ import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
 import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_KEY;
+import static com.example.wmell.app.util.Constants.GATE_NAME;
 import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_TRIES;
@@ -83,6 +84,7 @@ public class CheckUserPasswordActivity extends AppCompatActivity implements Serv
                                 Intent intent = new Intent(CheckUserPasswordActivity.this, NfcSendDataActivity.class);
                                 intent.putExtra(GATE_ID, getIntent().getExtras().getInt(GATE_ID));
                                 intent.putExtra(GATE_KEY, getIntent().getExtras().getString(GATE_KEY));
+                                intent.putExtra(GATE_NAME,getIntent().getExtras().getString(GATE_NAME));
                                 startActivityForResult(intent, GATE_DETAILS_INTENT);
                             }
                         }

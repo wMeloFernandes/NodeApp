@@ -25,6 +25,7 @@ import retrofit2.Callback;
 
 import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_KEY;
+import static com.example.wmell.app.util.Constants.GATE_NAME;
 import static com.example.wmell.app.util.Constants.NDEF_NFC_CHECK_MESSAGE;
 import static com.example.wmell.app.util.Constants.NDEF_NFC_GATE_TOKEN;
 import static com.example.wmell.app.util.Constants.NDEF_NFC_TOKEN;
@@ -78,6 +79,19 @@ public class NfcSendDataActivity extends AppCompatActivity {
                 Log.v("WILLIAN", throwable.getMessage());
             }
         }, getIntent().getExtras().getInt(GATE_ID));
+        updateHistoricalList(new ServerCallbackStatusUpdate() {
+            @Override
+            public void onSuccess(Response response) {
+                if (response.getStatus().compareTo("200") != 0) {
+                    Log.v("WILLIAN", "Error updating last user access: " + response.getStatus());
+                }
+            }
+
+            @Override
+            public void onFail(Throwable throwable) {
+                Log.v("WILLINA", throwable.getMessage());
+            }
+        }, getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0), getIntent().getExtras().getInt(GATE_ID), getIntent().getExtras().getString(GATE_NAME));
 
 
         getNFCToken(new ServerCallbackNFC() {
@@ -141,6 +155,27 @@ public class NfcSendDataActivity extends AppCompatActivity {
         DigitalKeyApi service = ApiManager.getService();
 
         Call<Response> call = service.updateGateLastAccess(gate_id);
+
+        call.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                if (response.isSuccessful()) {
+                    Response response1 = response.body();
+                    serverCallbackStatusUpdate.onSuccess(response1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+                serverCallbackStatusUpdate.onFail(t);
+            }
+        });
+    }
+
+    public void updateHistoricalList(final ServerCallbackStatusUpdate serverCallbackStatusUpdate, int user_id, int gate_id, String gate_name) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<Response> call = service.updateHistoricalList(user_id, gate_id, gate_name);
 
         call.enqueue(new Callback<Response>() {
             @Override

@@ -60,6 +60,7 @@ public class GateDetails extends AppCompatActivity {
                 Intent intent = new Intent(GateDetails.this, CheckUserPasswordActivity.class);
                 intent.putExtra(GATE_ID, mGateID);
                 intent.putExtra(GATE_KEY, getIntent().getExtras().getString(GATE_KEY));
+                intent.putExtra(GATE_NAME,mGateName);
                 startActivityForResult(intent, GATE_DETAILS_INTENT);
             }
         });
