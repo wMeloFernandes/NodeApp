@@ -13,6 +13,7 @@ import com.example.wmell.app.util.Utils;
 
 import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
 import static com.example.wmell.app.util.Constants.GATE_ID;
+import static com.example.wmell.app.util.Constants.GATE_KEY;
 import static com.example.wmell.app.util.Constants.GATE_LAST_ACCESS;
 import static com.example.wmell.app.util.Constants.GATE_NAME;
 
@@ -58,6 +59,7 @@ public class GateDetails extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(GateDetails.this, CheckUserPasswordActivity.class);
                 intent.putExtra(GATE_ID, mGateID);
+                intent.putExtra(GATE_KEY, getIntent().getExtras().getString(GATE_KEY));
                 startActivityForResult(intent, GATE_DETAILS_INTENT);
             }
         });

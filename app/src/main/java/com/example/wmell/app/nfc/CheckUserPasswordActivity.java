@@ -17,6 +17,7 @@ import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.login.LoginApplication;
 import com.example.wmell.app.main.GateDetails;
+import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallbackLogin;
@@ -30,6 +31,7 @@ import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
 
 import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
 import static com.example.wmell.app.util.Constants.GATE_ID;
+import static com.example.wmell.app.util.Constants.GATE_KEY;
 import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_TRIES;
@@ -40,6 +42,11 @@ public class CheckUserPasswordActivity extends AppCompatActivity implements Serv
     private TextView mPasswordText;
     private CirclePinField mCirclePinField;
     private ProgressBar mProgressBar;
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(CheckUserPasswordActivity.this, MainActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +82,7 @@ public class CheckUserPasswordActivity extends AppCompatActivity implements Serv
                                 editor.commit();
                                 Intent intent = new Intent(CheckUserPasswordActivity.this, NfcSendDataActivity.class);
                                 intent.putExtra(GATE_ID, getIntent().getExtras().getInt(GATE_ID));
+                                intent.putExtra(GATE_KEY, getIntent().getExtras().getString(GATE_KEY));
                                 startActivityForResult(intent, GATE_DETAILS_INTENT);
                             }
                         }

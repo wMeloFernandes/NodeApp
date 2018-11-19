@@ -15,11 +15,17 @@ import com.example.wmell.app.util.Utils;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 
+import static com.example.wmell.app.util.Constants.NDEF_NFC_CHECK_MESSAGE;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_GATE_TOKEN;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_TOKEN;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_USER_TOKEN;
+
 
 public class HostApduServiceNfc extends HostApduService {
 
 
     private static final String TAG = "JDR HostApduServiceNfc";
+    private static int SEND_MODE = 0;
 
     //
     // We use the default AID from the HCE Android documentation
@@ -51,8 +57,11 @@ public class HostApduServiceNfc extends HostApduService {
             (byte) 0xb0, // INS	- Instruction - Instruction code
             (byte) 0x00, // P1	- Parameter 1 - Instruction parameter 1
             (byte) 0x00, // P2	- Parameter 2 - Instruction parameter 2
-            (byte) 0x0f  // Lc field	- Number of bytes present in the data field of the command
+            (byte) 0x01,  // Lc field	- Number of bytes present in the data field of the command
+            (byte) 0xe1   //file identifier of the CC file
     };
+
+
 
     // In the scenario that we have done a CC read, the same byte[] match
     // for ReadBinary would trigger and we don't want that in succession
@@ -96,10 +105,15 @@ public class HostApduServiceNfc extends HostApduService {
     };
 
     private static final byte[] A_OKAY = {
-            (byte) 0x57,  // SW1	Status byte 1 - Command processing status
-            (byte) 0x49,   // SW2	Status byte 2 - Command processing qualifier
-            (byte) 0x4C,    //L
-            (byte) 0x4C     //L
+            (byte) 87,  // SW1	Status byte 1 - Command processing status
+            (byte) 73,   // SW2	Status byte 2 - Command processing qualifier
+            (byte) 76,    //L
+            (byte) 76     //L
+    };
+
+    private static final byte[] NO_SIGNAL = {
+            (byte) 0x4E,
+            (byte) 0x4F
     };
 
     private static final byte[] NDEF_ID = {
@@ -115,31 +129,28 @@ public class HostApduServiceNfc extends HostApduService {
     );
     private byte[] NDEF_URI_BYTES = NDEF_URI.toByteArray();
     private byte[] NDEF_URI_LEN = BigInteger.valueOf(NDEF_URI_BYTES.length).toByteArray();
+    private static byte[] NFC_TOKEN_BYTES;
+    private static byte[] NFC_FINAL_TOKEN_BYTES;
+    private static byte[] NFC_PRIMARY_TOKEN;
+    private static byte[] NFC_GATE_ID_TOKEN;
+    private String nfcToken;
+    private String nfcCheckMessage;
+    private String nfcUserToken;
+    private String nfcGateToken;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        if (intent.hasExtra("ndefMessage")) {
-            NDEF_URI = new NdefRecord(
-                    NdefRecord.TNF_WELL_KNOWN,
-                    NdefRecord.RTD_TEXT,
-                    NDEF_ID,
-                    intent.getStringExtra("ndefMessage").getBytes(Charset.forName("UTF-8"))
-            );
-
-            NDEF_URI_BYTES = NDEF_URI.toByteArray();
-            NDEF_URI_LEN = BigInteger.valueOf(NDEF_URI_BYTES.length).toByteArray();
-
-            Context context = getApplicationContext();
-            CharSequence text = "Your NDEF text has been set!";
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+        if (intent != null) {
+            if (intent.hasExtra(NDEF_NFC_TOKEN)) {
+                nfcToken = intent.getExtras().getString(NDEF_NFC_TOKEN);
+                nfcCheckMessage = intent.getExtras().getString(NDEF_NFC_CHECK_MESSAGE);
+                nfcUserToken = String.valueOf(intent.getExtras().getInt(NDEF_NFC_USER_TOKEN));
+                nfcGateToken = String.valueOf(intent.getExtras().getInt(NDEF_NFC_GATE_TOKEN));
+            }
+            Log.v("WILLIAN", nfcToken);
+            SEND_MODE = 1;
         }
-
-        Log.i(TAG, "onStartCommand() | NDEF" + NDEF_URI.toString());
-
         return Service.START_STICKY_COMPATIBILITY;
     }
 
@@ -156,8 +167,14 @@ public class HostApduServiceNfc extends HostApduService {
         // First command: NDEF Tag Application select (Section 5.5.2 in NFC Forum spec)
         //
         if (Utils.isEqual(APDU_SELECT, commandApdu)) {
-            Log.i(TAG, "APDU_SELECT triggered. Our Response: " + Utils.bytesToHex(A_OKAY));
-            return A_OKAY;
+            if (SEND_MODE == 1) {
+                Log.i(TAG, "APDU_SELECT triggered. Our Response: " + Utils.bytesToHex(A_OKAY));
+                SEND_MODE = 0;
+                NFC_TOKEN_BYTES = nfcCheckMessage.getBytes();
+                return NFC_TOKEN_BYTES;
+            } else {
+                return NO_SIGNAL;
+            }
         }
 
         //
@@ -165,16 +182,21 @@ public class HostApduServiceNfc extends HostApduService {
         //
         if (Utils.isEqual(CAPABILITY_CONTAINER, commandApdu)) {
             Log.i(TAG, "CAPABILITY_CONTAINER triggered. Our Response: " + Utils.bytesToHex(A_OKAY));
-            return A_OKAY;
+            if (nfcToken != null) {
+                NFC_FINAL_TOKEN_BYTES = nfcToken.getBytes();
+                return NFC_FINAL_TOKEN_BYTES;
+            } else {
+                return NO_SIGNAL;
+            }
         }
 
         //
         // Third command: ReadBinary data from CC file (Section 5.5.4 in NFC Forum spec)
         //
-        if (Utils.isEqual(READ_CAPABILITY_CONTAINER, commandApdu) && !READ_CAPABILITY_CONTAINER_CHECK) {
+        if (Utils.isEqual(READ_CAPABILITY_CONTAINER, commandApdu)) {
             Log.i(TAG, "READ_CAPABILITY_CONTAINER triggered. Our Response: " + Utils.bytesToHex(READ_CAPABILITY_CONTAINER_RESPONSE));
-            READ_CAPABILITY_CONTAINER_CHECK = true;
-            return READ_CAPABILITY_CONTAINER_RESPONSE;
+            NFC_PRIMARY_TOKEN = (nfcUserToken+nfcGateToken).getBytes();
+            return NFC_PRIMARY_TOKEN;
         }
 
         //

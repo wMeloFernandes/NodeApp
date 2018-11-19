@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.example.wmell.app.DAO.ResponseNFC;
 import com.example.wmell.app.R;
 import com.example.wmell.app.main.GateDetails;
+import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
 import com.example.wmell.app.networking.ServerCallbackNFC;
@@ -21,10 +22,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 import static com.example.wmell.app.util.Constants.GATE_ID;
+import static com.example.wmell.app.util.Constants.GATE_KEY;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_CHECK_MESSAGE;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_GATE_TOKEN;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_TOKEN;
+import static com.example.wmell.app.util.Constants.NDEF_NFC_USER_TOKEN;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class NfcSendDataActivity extends AppCompatActivity {
+
+    private static String mNFCToken;
+    private static Intent mIntent;
+    private static String mGateKey;
 
 
     @Override
@@ -38,13 +48,15 @@ public class NfcSendDataActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         mCountDownTimer.cancel();
-        startActivity(new Intent(NfcSendDataActivity.this, GateDetails.class));
+        startActivity(new Intent(NfcSendDataActivity.this, MainActivity.class));
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfc_send_data);
+        mGateKey = getIntent().getExtras().getString(GATE_KEY);
+        Log.v("WILLIAN", mGateKey);
 
 
         final RippleBackground rippleBackground = findViewById(R.id.content);
@@ -54,8 +66,15 @@ public class NfcSendDataActivity extends AppCompatActivity {
         getNFCToken(new ServerCallbackNFC() {
             @Override
             public void onSuccess(ResponseNFC responseNFC) {
-                Log.v("WILLIAN", responseNFC.getMessage());
-                Log.v("WILLIAN", String.valueOf(getIntent().getExtras().getInt(GATE_ID)));
+                mNFCToken = responseNFC.getMessage();
+                mIntent = new Intent(getApplicationContext(), HostApduServiceNfc.class);
+                String firstCheck = mGateKey;
+                mIntent.putExtra(NDEF_NFC_TOKEN, mNFCToken);
+                mIntent.putExtra(NDEF_NFC_CHECK_MESSAGE, firstCheck);
+                mIntent.putExtra(NDEF_NFC_USER_TOKEN,getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0));
+                mIntent.putExtra(NDEF_NFC_GATE_TOKEN,getIntent().getExtras().getInt(GATE_ID));
+                Log.v("WILLIAN", mNFCToken);
+                startService(mIntent);
             }
 
             @Override
@@ -82,7 +101,6 @@ public class NfcSendDataActivity extends AppCompatActivity {
     public void getNFCToken(final ServerCallbackNFC serverCallbackNFC, int user_id, int gate_id) {
         DigitalKeyApi service = ApiManager.getService();
 
-        //Call<ResponseNFC> call = service.makeNfcRequest(getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0), getIntent().getExtras().getInt(GATE_ID));
         Call<ResponseNFC> call = service.makeNfcRequest(user_id, gate_id);
 
 
