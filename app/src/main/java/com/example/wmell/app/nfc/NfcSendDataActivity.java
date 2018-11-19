@@ -40,7 +40,7 @@ public class NfcSendDataActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mCountDownTimer.cancel();
+       // mCountDownTimer.cancel();
     }
 
     private CountDownTimer mCountDownTimer;
@@ -71,8 +71,8 @@ public class NfcSendDataActivity extends AppCompatActivity {
                 String firstCheck = mGateKey;
                 mIntent.putExtra(NDEF_NFC_TOKEN, mNFCToken);
                 mIntent.putExtra(NDEF_NFC_CHECK_MESSAGE, firstCheck);
-                mIntent.putExtra(NDEF_NFC_USER_TOKEN,getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0));
-                mIntent.putExtra(NDEF_NFC_GATE_TOKEN,getIntent().getExtras().getInt(GATE_ID));
+                mIntent.putExtra(NDEF_NFC_USER_TOKEN, getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE).getInt(USERID_PREFERENCE, 0));
+                mIntent.putExtra(NDEF_NFC_GATE_TOKEN, getIntent().getExtras().getInt(GATE_ID));
                 Log.v("WILLIAN", mNFCToken);
                 startService(mIntent);
             }

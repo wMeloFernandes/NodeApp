@@ -497,7 +497,9 @@ public class MainActivity extends AppCompatActivity
         updatePermissions(new ServerCallbackUpdatePermissions() {
             @Override
             public void onSuccess(ResponseUpdatePermissions response) {
-                mPermissionsUsergates = Utils.parsePermissions(response.getPermissions().get(0).getPermissions());
+                if (mPermissionsUsergates != null) {
+                    mPermissionsUsergates = Utils.parsePermissions(response.getPermissions().get(0).getPermissions());
+                }
             }
 
             @Override
@@ -619,7 +621,7 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra(GATE_NAME, mGatesDAO.getGates().get(position).getName());
             intent.putExtra(GATE_LAST_ACCESS, mGatesDAO.getGates().get(position).getLastAccess());
             intent.putExtra(GATE_ID, mGatesDAO.getGates().get(position).getGateId());
-            intent.putExtra(GATE_KEY,mGatesDAO.getGates().get(position).getGateKey());
+            intent.putExtra(GATE_KEY, mGatesDAO.getGates().get(position).getGateKey());
             startActivityForResult(intent, GATE_DETAILS_INTENT);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.Theme_AppCompat));

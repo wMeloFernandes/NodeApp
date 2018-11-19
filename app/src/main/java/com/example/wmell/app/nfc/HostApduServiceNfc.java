@@ -62,7 +62,6 @@ public class HostApduServiceNfc extends HostApduService {
     };
 
 
-
     // In the scenario that we have done a CC read, the same byte[] match
     // for ReadBinary would trigger and we don't want that in succession
     private boolean READ_CAPABILITY_CONTAINER_CHECK = false;
@@ -170,7 +169,9 @@ public class HostApduServiceNfc extends HostApduService {
             if (SEND_MODE == 1) {
                 Log.i(TAG, "APDU_SELECT triggered. Our Response: " + Utils.bytesToHex(A_OKAY));
                 SEND_MODE = 0;
-                NFC_TOKEN_BYTES = nfcCheckMessage.getBytes();
+                if (nfcCheckMessage != null) {
+                    NFC_TOKEN_BYTES = nfcCheckMessage.getBytes();
+                }
                 return NFC_TOKEN_BYTES;
             } else {
                 return NO_SIGNAL;
@@ -195,7 +196,7 @@ public class HostApduServiceNfc extends HostApduService {
         //
         if (Utils.isEqual(READ_CAPABILITY_CONTAINER, commandApdu)) {
             Log.i(TAG, "READ_CAPABILITY_CONTAINER triggered. Our Response: " + Utils.bytesToHex(READ_CAPABILITY_CONTAINER_RESPONSE));
-            NFC_PRIMARY_TOKEN = (nfcUserToken+nfcGateToken).getBytes();
+            NFC_PRIMARY_TOKEN = (nfcUserToken + nfcGateToken).getBytes();
             return NFC_PRIMARY_TOKEN;
         }
 
