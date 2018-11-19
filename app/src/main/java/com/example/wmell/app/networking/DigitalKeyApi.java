@@ -76,4 +76,7 @@ public interface DigitalKeyApi {
     Call<ResponseNFC> makeNfcRequest(@Field("user_id") int user_id,
                                      @Field("gate_id") int gate_id);
 
+    @POST("/updateGateLastAccess")
+    @FormUrlEncoded
+    Call<Response> updateGateLastAccess(@Field("gate_id") int gate_id);
 }
