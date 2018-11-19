@@ -37,6 +37,10 @@ public interface DigitalKeyApi {
     Call<User> checkUserAccess(@Field("email") String email,
                                @Field("password") String password);
 
+    @POST("/updateUserLastAccess")
+    @FormUrlEncoded
+    Call<Response> updateUserLastAccess(@Field("user_id") int user_id);
+
 
     @POST("/recoverPassword")
     @FormUrlEncoded

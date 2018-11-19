@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
@@ -14,12 +15,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wmell.app.DAO.Response;
 import com.example.wmell.app.DAO.User;
 import com.example.wmell.app.R;
 import com.example.wmell.app.main.MainActivity;
 import com.example.wmell.app.networking.ApiManager;
 import com.example.wmell.app.networking.DigitalKeyApi;
+import com.example.wmell.app.networking.ServerCallback;
 import com.example.wmell.app.networking.ServerCallbackLogin;
+import com.example.wmell.app.networking.ServerCallbackStatusUpdate;
 import com.example.wmell.app.util.Utils;
 
 import retrofit2.Call;
@@ -108,6 +112,19 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                                 editor.putInt(USER_TRIES, 4);
                                 editor.commit();
 
+                                updateUserLastAccess(new ServerCallbackStatusUpdate() {
+                                    @Override
+                                    public void onSuccess(Response response) {
+                                        if (response.getStatus().compareTo("200") != 0) {
+                                            Log.v("WILLIAN", "Error updating last user access: " + response.getStatus());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Throwable throwable) {
+                                        Log.v("WILLIAN", throwable.getMessage());
+                                    }
+                                }, user.getUserId());
                                 startActivity(new Intent(LoginApplication.this, MainActivity.class));
                             } else if (Integer.valueOf(user.getStatus()) == 404) {
                                 Toast.makeText(LoginApplication.this, "E-mail doesn't exist!", Toast.LENGTH_SHORT).show();
@@ -163,6 +180,26 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 serverCallback.onFail(t);
+            }
+        });
+    }
+
+    public void updateUserLastAccess(final ServerCallbackStatusUpdate serverCallbackStatusUpdate, int user_id) {
+        DigitalKeyApi service = ApiManager.getService();
+
+        Call<Response> call = service.updateUserLastAccess(user_id);
+        call.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                if (response.isSuccessful()) {
+                    Response response1 = response.body();
+                    serverCallbackStatusUpdate.onSuccess(response1);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+                serverCallbackStatusUpdate.onFail(t);
             }
         });
     }
