@@ -10,14 +10,13 @@ public class ResponseUpdatePermissions {
 
     @SerializedName("permissions")
     @Expose
-    private List<UpdatePermission> permissions = null;
+    private String permissions;
 
-    public List<UpdatePermission> getPermissions() {
+    public String getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<UpdatePermission> permissions) {
+    public void setPermissions(String permissions) {
         this.permissions = permissions;
     }
-
 }

@@ -31,8 +31,10 @@ import retrofit2.Callback;
 
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.FROM_LOGIN_PREFERENCE;
 import static com.example.wmell.app.util.Constants.IS_USER_LOGIN;
 import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
+
 import static com.example.wmell.app.util.Constants.PERMISSIONS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
@@ -100,6 +102,7 @@ public class LoginApplication extends AppCompatActivity implements ServerCallbac
                                 editor.putInt(USERID_PREFERENCE, user.getUserId());
                                 editor.putString(LASTACCESS_PREFERENCE, user.getLastAccess());
                                 editor.putString(PERMISSIONS_PREFERENCE, user.getPermissions());
+                                editor.putInt(FROM_LOGIN_PREFERENCE, 0);
                                 editor.commit();
 
                                 sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);

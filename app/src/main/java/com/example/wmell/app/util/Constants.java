@@ -22,6 +22,7 @@ public class Constants {
     public static final String USERID_PREFERENCE = "USERID_PREFERENCE";
     public static final String LASTACCESS_PREFERENCE = "LASTACCESS_PREFERENCE";
     public static final String PERMISSIONS_PREFERENCE = "PERMISSIONS_PREFERENCE";
+    public static final String FROM_LOGIN_PREFERENCE = "FROM_LOGIN_PREFERENCE";
 
 
     public static final int HAS_ACCESS = 2;

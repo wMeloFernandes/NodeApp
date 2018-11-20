@@ -50,6 +50,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.FROM_LOGIN_PREFERENCE;
 import static com.example.wmell.app.util.Constants.GATE_DETAILS_INTENT;
 import static com.example.wmell.app.util.Constants.GATE_ID;
 import static com.example.wmell.app.util.Constants.GATE_KEY;
@@ -71,14 +72,6 @@ public class MainActivity extends AppCompatActivity
 
     private static LinearLayout mLinerarLayoutMain;
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == GATE_DETAILS_INTENT) {
-            if (resultCode == RESULT_OK) {
-                Log.v("WILLIAN", "Intent working!");
-            }
-        }
-    }
 
     private ProgressBar mProgressBarMain;
     private TextView mTextViewMain;
@@ -122,6 +115,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_update) {
             setTitle(getString(R.string.title_main_activity_gates));
             updateActivity();
+            Toast.makeText(this, "UPDATE", Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -244,6 +238,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onRestart() {
         super.onRestart();
+        initView();
         initData();
     }
 
@@ -255,6 +250,7 @@ public class MainActivity extends AppCompatActivity
         mSharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
         initView();
         initData();
+
     }
 
 
@@ -301,7 +297,25 @@ public class MainActivity extends AppCompatActivity
         TextView email = headerLayout.findViewById(R.id.emailView);
         name.setText(mSharedPreferences.getString(USERNAME_PREFERENCE, ""));
         email.setText(mSharedPreferences.getString(EMAIL_PREFERENCE, ""));
-        mPermissionsUsergates = Utils.parsePermissions(mSharedPreferences.getString(PERMISSIONS_PREFERENCE, ""));
+        int fromLogin = mSharedPreferences.getInt(FROM_LOGIN_PREFERENCE, 1);
+        if (fromLogin == 0) {
+            mPermissionsUsergates = Utils.parsePermissions(mSharedPreferences.getString(PERMISSIONS_PREFERENCE, ""));
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putInt(FROM_LOGIN_PREFERENCE, 1);
+        } else {
+            updatePermissions(new ServerCallbackUpdatePermissions() {
+                @Override
+                public void onSuccess(ResponseUpdatePermissions response) {
+                    mPermissionsUsergates = Utils.parsePermissions(response.getPermissions());
+                }
+
+                @Override
+                public void onFail(Throwable throwable) {
+                    Toast.makeText(MainActivity.this, "Try again later!", Toast.LENGTH_SHORT).show();
+                    Log.v("WILLIAN", throwable.getMessage());
+                }
+            });
+        }
 
         mLinerarLayoutMain = findViewById(R.id.linearLayout_mainScreen);
         mProgressBarMain = findViewById(R.id.progressBar_MainScreen);
@@ -419,45 +433,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void updateUIFetchingData() {
-        mLinerarLayoutMain.setVisibility(View.GONE);
-        mRecyclerViewData.setVisibility(View.VISIBLE);
-    }
-
-    public static void updateUIFetchingDataHide() {
-        mLinerarLayoutMain.setVisibility(View.VISIBLE);
-        mRecyclerViewData.setVisibility(View.GONE);
-    }
-
-    private void checkHasAuthorization(int authorization, final View view, final Gate gate) {
-        switch (authorization) {
-            case PERMISSION_GRANTED:
-                startActivity(new Intent(MainActivity.this, GateDetails.class));
-                break;
-            case PERMISSION_DENIED:
-                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.Theme_AppCompat));
-                builder.setMessage("You don't have access to this port. Do you wanna request?");
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "Requesting access...", Toast.LENGTH_SHORT).show();
-                        updateActivity();
-                    }
-                });
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "Thank you!", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                builder.show();
-                break;
-            case PERMISSION_REQUESTED:
-                Toast.makeText(this, "You already requested access to this gate. Waiting for approval!", Toast.LENGTH_SHORT).show();
-                break;
-        }
-
-    }
 
     public void getGatesList(final ServerCallback serverCallback) {
         DigitalKeyApi service = ApiManager.getService();
@@ -497,9 +472,7 @@ public class MainActivity extends AppCompatActivity
         updatePermissions(new ServerCallbackUpdatePermissions() {
             @Override
             public void onSuccess(ResponseUpdatePermissions response) {
-                if (mPermissionsUsergates != null) {
-                    mPermissionsUsergates = Utils.parsePermissions(response.getPermissions().get(0).getPermissions());
-                }
+                mPermissionsUsergates = Utils.parsePermissions(response.getPermissions());
             }
 
             @Override
