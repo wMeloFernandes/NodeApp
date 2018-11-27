@@ -33,7 +33,8 @@ public interface DigitalKeyApi {
                                          @Field("permissions") String permissions,
                                          @Field("email") String email);
 
-    @POST
+    @POST("/getGatesByStatus")
+    @FormUrlEncoded
     Call<GateResponseList> getGatesByStatus(@Field("user_id") int user_id);
 
     @POST("/userAccess")
