@@ -1,5 +1,6 @@
 package com.example.wmell.app.networking;
 
+import com.example.wmell.app.DAO.GateResponseList;
 import com.example.wmell.app.DAO.Gates;
 import com.example.wmell.app.DAO.HistoricalUserList;
 import com.example.wmell.app.DAO.Permissions;
@@ -31,6 +32,9 @@ public interface DigitalKeyApi {
                                          @Field("password") String password,
                                          @Field("permissions") String permissions,
                                          @Field("email") String email);
+
+    @POST
+    Call<GateResponseList> getGatesByStatus(@Field("user_id") int user_id);
 
     @POST("/userAccess")
     @FormUrlEncoded
