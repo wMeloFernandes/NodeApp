@@ -1,5 +1,6 @@
 package com.example.wmell.app.main;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -435,17 +436,6 @@ public class MainActivity extends AppCompatActivity
                 //Setting RecyclerView
                 mLayoutManager = new LinearLayoutManager(getApplicationContext());
                 mRecyclerViewData.setLayoutManager(mLayoutManager);
-                mRecyclerViewData.addOnItemTouchListener(new MainActivity.RecyclerTouchListener(getApplicationContext(), mRecyclerViewData, new ClickListenerRecyclerView() {
-                    @Override
-                    public void onClick(View view, final int position) {
-                        onClickRequest(position);
-                    }
-
-                    @Override
-                    public void onLongClick(View view, int position) {
-                    }
-                }));
-
                 mGatesByStatus = gateResponseList.getResult();
                 mGateAdapter = new GatesAdapter(getApplicationContext(), mGatesByStatus);
                 mRecyclerViewData.setAdapter(mGateAdapter);
@@ -530,6 +520,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    @SuppressLint("RestrictedApi")
     private void onClickRequest(final int position) {
         if (mGatesByStatus.get(position).getStatus() == 1) {
             Toast.makeText(MainActivity.this, "You have already made a request for this port! Wait for manager's approval!", Toast.LENGTH_SHORT).show();
@@ -540,9 +531,9 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra(GATE_ID, mGatesByStatus.get(position).getGateId());
             intent.putExtra(GATE_KEY, mGatesByStatus.get(position).getGateKey());
             startActivityForResult(intent, GATE_DETAILS_INTENT);
-        } else {
+        } else if (mGatesByStatus.get(position).getStatus() == 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.Theme_AppCompat));
-            builder.setMessage("Do you wanna request access to this port?");
+            builder.setMessage("You don't have access to this gate. Would you like to request it?");
             builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -555,6 +546,8 @@ public class MainActivity extends AppCompatActivity
                         public void onSuccess(com.example.wmell.app.DAO.Response response) {
                             if (Integer.valueOf(response.getStatus()) == 200) {
                                 Toast.makeText(MainActivity.this, "Successful request!", Toast.LENGTH_SHORT).show();
+                                mGatesByStatus.get(position).setStatus(HOLD_ACCESS);
+                                mGateAdapter.notifyDataSetChanged();
                                 updateActivity();
                             } else {
                                 Toast.makeText(MainActivity.this, "Error: " + response.getStatus() + "!\nTry again later!", Toast.LENGTH_SHORT).show();

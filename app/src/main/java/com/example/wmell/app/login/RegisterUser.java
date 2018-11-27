@@ -28,9 +28,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.IS_USER_LOGIN;
 import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class RegisterUser extends AppCompatActivity implements ServerCallbackRegisterRecover {
@@ -83,6 +85,13 @@ public class RegisterUser extends AppCompatActivity implements ServerCallbackReg
                                 builder.setPositiveButton(getString(R.string.ok_dialog_alert_text), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
+                                        SharedPreferences sharedPreferences = getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+                                        editor = sharedPreferences.edit();
+                                        editor.putBoolean(IS_USER_LOGIN, true);
+                                        editor.commit();
+                                        
                                         startActivity(new Intent(RegisterUser.this, MainActivity.class));
                                         Toast.makeText(RegisterUser.this, "Your account was successful registered!\nWelcome to Digital Key!", Toast.LENGTH_LONG).show();
                                     }
