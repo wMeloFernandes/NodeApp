@@ -29,9 +29,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 import static com.example.wmell.app.util.Constants.EMAIL_PREFERENCE;
+import static com.example.wmell.app.util.Constants.IS_USER_LOGIN;
 import static com.example.wmell.app.util.Constants.LASTACCESS_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERID_PREFERENCE;
 import static com.example.wmell.app.util.Constants.USERNAME_PREFERENCE;
+import static com.example.wmell.app.util.Constants.USER_LOGIN_PREFERENCES;
 import static com.example.wmell.app.util.Constants.USER_PREFERENCES;
 
 public class RecoverPassword extends AppCompatActivity implements ServerCallbackRegisterRecover {
@@ -123,6 +125,11 @@ public class RecoverPassword extends AppCompatActivity implements ServerCallback
                             editor.putInt(USERID_PREFERENCE, response.getUserId());
                             editor.putString(LASTACCESS_PREFERENCE, response.getLastAccess());
                             editor.apply();
+
+                            sharedPreferences = getSharedPreferences(USER_LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+                            editor = sharedPreferences.edit();
+                            editor.putBoolean(IS_USER_LOGIN, true);
+                            editor.commit();
 
                             startActivity(new Intent(RecoverPassword.this, MainActivity.class));
                             Toast.makeText(RecoverPassword.this, "Password changed successful", Toast.LENGTH_LONG).show();
